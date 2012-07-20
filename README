@@ -1,0 +1,54 @@
+Copyright (c) 2012, Leif Bruder <leifbruder@gmail.com>
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+Simple Lisp interpreter for C# 3.5
+==================================
+This is a pet Lisp interpreter for .NET 3.5 written in C#. Currently supports
+only the minimum operations to get a program running:
+
+- define, setf, if, quote, lambda, progn
+- cons, car, cdr, list, reverse, map, filter
+- lexical scoping
+- minimal arithmetic (all numbers are double FOR NOW):
+  +, -, *, /, rem (remainder), =, >, <, <=, >=
+- recursion (no deep levels!)
+- (range ?start-value number-of-values ?step)
+  (range 5) => (0 1 2 3 4)
+  (range 2 5) => (2 3 4 5 6)
+  (range 2 5 3) => (2 5 8 11 14)
+- print function (raises an event with the string to print)
+- t, nil as in Common Lisp
+- everything but nil evaluates to true
+
+Plans:
+- essentials:
+  not, listp, symbolp, nullp, equalp, length, append, reduce, push
+- list predicates like allp, anyp, nonep, somep
+- defun (with &rest parameters)
+- defmacro
+- gensym
+- eval
+- port operations (files, strings as streams, sockets...)
+- read (from string, port etc.)
+
+
+CLR FFI:
+- clr-methods
+- clr-properties
+- clr-get
+- clr-set
+- clr-new
+- clr-call (or ".")
+- Interpreter method AddFunction to use e.g. C# lambdas as Lisp functions
