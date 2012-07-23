@@ -18,27 +18,29 @@ Simple Lisp interpreter for C# 3.5
 This is a pet Lisp interpreter for .NET 3.5 written in C#. Currently supports
 only the minimum operations to get a program running:
 
-- define, setf, if, quote, lambda, progn
-- cons, car, cdr, list, reverse, map, filter
+- Special Forms: define, defun, setf, if, quote, lambda, progn
+- cons, car, cdr, list, reverse, map, filter, reduce, all, any, not
+- nullp, consp, symbolp, length, reverse, eq
 - lexical scoping
 - minimal arithmetic (all numbers are double FOR NOW):
   +, -, *, /, rem (remainder), =, >, <, <=, >=
-- recursion (no deep levels!)
-- (range ?start-value number-of-values ?step)
+- recursion (no deep levels, no TCO!)
+- (range ?start-value below-value ?step)
   (range 5) => (0 1 2 3 4)
-  (range 2 5) => (2 3 4 5 6)
-  (range 2 5 3) => (2 5 8 11 14)
+  (range 2 5) => (2 3 4)
+  (range 2 16 3) => (2 5 8 11 14)
 - print function (raises an event with the string to print)
 - t, nil as in Common Lisp
 - everything but nil evaluates to true
+- gensym
+
 
 Plans:
-- essentials:
-  not, listp, symbolp, nullp, equalp, length, append, reduce, push
-- list predicates like allp, anyp, nonep, somep
 - defun (with &rest parameters)
 - defmacro
-- gensym
+- Quasiquoting
+- string operations
+- "Prelude" script with some more standard functions like equalp, append, push...
 - eval
 - port operations (files, strings as streams, sockets...)
 - read (from string, port etc.)
@@ -52,3 +54,4 @@ CLR FFI:
 - clr-new
 - clr-call (or ".")
 - Interpreter method AddFunction to use e.g. C# lambdas as Lisp functions
+

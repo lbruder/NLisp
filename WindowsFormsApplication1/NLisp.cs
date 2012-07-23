@@ -9,31 +9,29 @@ using System.Text;
 namespace org.lb.NLisp
 {
     // TODO:
+    // - defun and lambda with &rest parameters
+    // - defmacro
+    // - quasiquoting
+    // - some basic(!) kind of while... loop
 
-    // defun (+ &rest parameters)
-    // defmacro
-    // gensym
+    // - clr-methods
+    // - clr-properties
+    // - clr-get
+    // - clr-set
+    // - clr-new
+    // - clr-call (".")
+    // - eval
+    // - port operations
+    // - read (from string, port)
 
-    //not
-    //listp
-    //symbolp
-    //nullp
-    //alert
-    //equalp
-    //length
-    //append
-    //reduce
-    //any?
-    //push
-    //range
-
-    //clr-methods, clr-properties, clr-get, clr-set, clr-new, clr-call (".")
-    //eval
-    //port operations
-    //read (from string, port)
+    // Prelude: Lisp script to read and execute on startup -> flesh out the language in Lisp, keep the C# code under 1000 lines
+    // - let over lambda
+    // - equal
+    // - append
+    // - push
 
     #region Exceptions
-    
+
     public sealed class LispConstantCanNotBeChangedException : Exception
     {
         internal LispConstantCanNotBeChangedException(LispSymbol sym)
@@ -62,6 +60,26 @@ namespace org.lb.NLisp
     {
         internal LispObjectIsNotAListException(object obj)
             : base("The value " + obj + " is not a list") // TODO: I18N
+        {
+        }
+    }
+
+    public sealed class LispInvalidOperationException : Exception
+    {
+        internal LispInvalidOperationException(LispObject o1, string op)
+            : base("Invalid operation: (" + op + " " + o1 + ")") // TODO: I18N
+        {
+        }
+        internal LispInvalidOperationException(LispObject o1, LispObject o2, string op)
+            : base("Invalid operation: (" + op + " " + o1 + " " + o2 + ")") // TODO: I18N
+        {
+        }
+    }
+
+    public sealed class LispDivisionByZeroException : Exception
+    {
+        internal LispDivisionByZeroException()
+            : base("Division by zero") // TODO: I18N
         {
         }
     }
@@ -128,11 +146,21 @@ namespace org.lb.NLisp
 
     internal abstract class LispObject
     {
-        public abstract bool IsTrue();
+        public virtual bool IsTrue() { return true; }
         public virtual bool NullP() { return false; }
         public virtual LispObject Eval(Environment env) { return LispNil.GetInstance(); }
         public virtual LispObject Car() { throw new LispObjectIsNotAListException(this); }
         public virtual LispObject Cdr() { throw new LispObjectIsNotAListException(this); }
+        public virtual LispObject Add(LispObject other) { throw new LispInvalidOperationException(this, other, "+"); }
+        public virtual LispObject Sub(LispObject other) { throw new LispInvalidOperationException(this, other, "-"); }
+        public virtual LispObject Mul(LispObject other) { throw new LispInvalidOperationException(this, other, "*"); }
+        public virtual LispObject Div(LispObject other) { throw new LispInvalidOperationException(this, other, "/"); }
+        public virtual LispObject Rem(LispObject other) { throw new LispInvalidOperationException(this, other, "rem"); }
+        public virtual LispObject NumEq(LispObject other) { throw new LispInvalidOperationException(this, other, "="); }
+        public virtual LispObject Gt(LispObject other) { throw new LispInvalidOperationException(this, other, ">"); }
+        public virtual LispObject Lt(LispObject other) { throw new LispInvalidOperationException(this, other, "<"); }
+        public virtual LispObject Ge(LispObject other) { throw new LispInvalidOperationException(this, other, ">="); }
+        public virtual LispObject Le(LispObject other) { throw new LispInvalidOperationException(this, other, "<="); }
 
         public static LispObject FromClrObject(object source)
         {
@@ -140,6 +168,7 @@ namespace org.lb.NLisp
             if (source is LispObject) return (LispObject)source;
             if (source is bool) return ((bool)source) ? (LispObject)LispT.GetInstance() : LispNil.GetInstance();
             if (source is byte) return new LispNumber((byte)source);
+            if (source is char) return new LispString(source.ToString()); // TODO: LispChar type
             if (source is short) return new LispNumber((short)source);
             if (source is ushort) return new LispNumber((ushort)source);
             if (source is int) return new LispNumber((int)source);
@@ -153,7 +182,7 @@ namespace org.lb.NLisp
             {
                 LispObject ret = LispNil.GetInstance();
                 var list = (IList)source;
-                for (int i = list.Count - 1; i >= 0; --i) ret = new LispConsCell(FromClrObject(list[i]), ret);
+                for (int i = list.Count - 1; i >= 0; --i) ret = LispConsCell.Cons(FromClrObject(list[i]), ret);
                 return ret;
             }
             if (source is Delegate) return new LispFunctionProxy(source as Delegate);
@@ -181,7 +210,6 @@ namespace org.lb.NLisp
         private static readonly LispT instance = new LispT();
         private LispT() { }
         public static LispT GetInstance() { return instance; }
-        public override bool IsTrue() { return true; }
         public override LispObject Eval(Environment env) { return this; }
         public override string ToString() { return "t"; }
         public override bool Equals(object obj) { return obj is LispT; }
@@ -192,23 +220,52 @@ namespace org.lb.NLisp
     {
         private readonly double number;
         public LispNumber(double number) { this.number = number; }
-        public double Number { get { return number; } }
-        public override bool IsTrue() { return true; }
+        public int NumberAsInt { get { return (int)number; } }
         public override LispObject Eval(Environment env) { return this; }
         public override string ToString() { return number.ToString(CultureInfo.InvariantCulture); }
         public override bool Equals(object obj) { return (obj is LispNumber) && ((LispNumber)obj).number == number; }
         public override int GetHashCode() { return number.GetHashCode(); }
+        public override LispObject Add(LispObject other) { return new LispNumber(number + OtherNumber(other, "+")); }
+        public override LispObject Sub(LispObject other) { return new LispNumber(number - OtherNumber(other, "-")); }
+        public override LispObject Mul(LispObject other) { return new LispNumber(number * OtherNumber(other, "*")); }
+        public override LispObject Div(LispObject other) { if (OtherNumber(other, "/") == 0) throw new LispDivisionByZeroException(); return new LispNumber(number / OtherNumber(other, "/")); }
+        public override LispObject Rem(LispObject other) { if (OtherNumber(other, "rem") == 0) throw new LispDivisionByZeroException(); return new LispNumber(number % OtherNumber(other, "rem")); }
+        public override LispObject NumEq(LispObject other) { return FromClrObject(number == OtherNumber(other, "=")); }
+        public override LispObject Lt(LispObject other) { return FromClrObject(number < OtherNumber(other, "<")); }
+        public override LispObject Gt(LispObject other) { return FromClrObject(number > OtherNumber(other, ">")); }
+        public override LispObject Le(LispObject other) { return FromClrObject(number <= OtherNumber(other, "<=")); }
+        public override LispObject Ge(LispObject other) { return FromClrObject(number >= OtherNumber(other, ">=")); }
+        private double OtherNumber(LispObject other, string op)
+        {
+            LispNumber n = other as LispNumber;
+            if (n == null) throw new LispInvalidOperationException(this, other, op);
+            return n.number;
+        }
     }
 
-    internal sealed class LispString : LispObject
+    internal sealed class LispString : LispObject, IEnumerable<LispObject>
     {
         private readonly string value;
         public LispString(string value) { this.value = value; }
-        public override bool IsTrue() { return true; }
         public override LispObject Eval(Environment env) { return this; }
-        public override string ToString() { return '"' + value + '"'; } // TODO: Escapes
+        public override string ToString() { return '"' + value.Replace("\n", "\\n").Replace("\r", "\\r").Replace("\t", "\\t") + '"'; }
         public override bool Equals(object obj) { return (obj is LispString) && ((LispString)obj).value.Equals(value); }
         public override int GetHashCode() { return value.GetHashCode(); }
+        public override LispObject Add(LispObject other) { return new LispString(value + OtherString(other, "+")); }
+        public override LispObject NumEq(LispObject other) { return FromClrObject(String.CompareOrdinal(value, OtherString(other, "=")) == 0); }
+        public override LispObject Lt(LispObject other) { return FromClrObject(String.CompareOrdinal(value, OtherString(other, "<")) < 0); }
+        public override LispObject Gt(LispObject other) { return FromClrObject(String.CompareOrdinal(value, OtherString(other, ">")) > 0); }
+        public override LispObject Le(LispObject other) { return FromClrObject(String.CompareOrdinal(value, OtherString(other, "<=")) <= 0); }
+        public override LispObject Ge(LispObject other) { return FromClrObject(String.CompareOrdinal(value, OtherString(other, ">=")) >= 0); }
+        private string OtherString(LispObject other, string op)
+        {
+            LispString n = other as LispString;
+            if (n == null) throw new LispInvalidOperationException(this, other, op);
+            return n.value;
+        }
+        public IEnumerator<LispObject> GetEnumerator() { return value.Select(c => FromClrObject(c)).GetEnumerator(); }
+        IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+        internal string Value { get { return value; } }
     }
 
     internal sealed class LispSymbol : LispObject
@@ -231,6 +288,7 @@ namespace org.lb.NLisp
         public override string ToString() { return value; }
         public override bool Equals(object obj) { return obj == this; }
         public override int GetHashCode() { return value.GetHashCode(); }
+        public static LispSymbol Gensym() { return fromString("#:G" + cache.Count.ToString(CultureInfo.InvariantCulture)); }
     }
 
     internal sealed class LispConsCell : LispObject, IEnumerable<LispObject>
@@ -239,57 +297,83 @@ namespace org.lb.NLisp
         private static readonly LispSymbol ifSym = LispSymbol.fromString("if");
         private static readonly LispSymbol prognSym = LispSymbol.fromString("progn");
         private static readonly LispSymbol defineSym = LispSymbol.fromString("define");
+        private static readonly LispSymbol defunSym = LispSymbol.fromString("defun");
         private static readonly LispSymbol setSym = LispSymbol.fromString("setf");
         private static readonly LispSymbol lambdaSym = LispSymbol.fromString("lambda");
 
         private readonly LispObject car;
         private readonly LispObject cdr;
-        public LispConsCell(LispObject car, LispObject cdr) { this.car = car; this.cdr = cdr; }
+        private LispConsCell(LispObject car, LispObject cdr) { this.car = car; this.cdr = cdr; }
+        public static LispConsCell Cons(LispObject car, LispObject cdr) { return new LispConsCell(car, cdr); }
         public override LispObject Car() { return car; }
         public override LispObject Cdr() { return cdr; }
-        public override bool IsTrue() { return true; }
 
         public override LispObject Eval(Environment env)
         {
             if (quoteSym.Equals(car)) return ((LispConsCell)cdr).car;
-            if (ifSym.Equals(car))
-            {
-                var asArray = this.ToArray();
-                if (asArray.Length != 4) throw new LispExpectedNParametersGotMException(car, 3, asArray.Length - 1);
-                return asArray[1].Eval(env).IsTrue() ? asArray[2].Eval(env) : asArray[3].Eval(env);
-            }
-            if (prognSym.Equals(car))
-            {
-                var asArray = this.ToArray();
-                if (asArray.Length == 1) return LispNil.GetInstance();
-                for (int i = 1; i < asArray.Length - 1; ++i) asArray[i].Eval(env);
-                return asArray[asArray.Length - 1].Eval(env);
-            }
-            if (defineSym.Equals(car))
-            {
-                var asArray = this.ToArray();
-                if (asArray.Length != 3) throw new LispExpectedNParametersGotMException(car, 2, asArray.Length - 1);
-                if (asArray[1] is LispSymbol) return env.Define((LispSymbol)asArray[1], asArray[2].Eval(env));
-                throw new LispSymbolExpectedException(asArray[1]);
-            }
-            if (setSym.Equals(car))
-            {
-                var asArray = this.ToArray();
-                if (asArray.Length != 3) throw new LispExpectedNParametersGotMException(car, 2, asArray.Length - 1);
-                if (asArray[1] is LispSymbol) return env.Set((LispSymbol)asArray[1], asArray[2].Eval(env));
-                throw new LispSymbolExpectedException(asArray[1]);
-            }
-            if (lambdaSym.Equals(car))
-            {
-                var asArray = this.ToArray();
-                if (asArray.Length < 2) throw new LispExpectedAtLeastNParametersGotMException(car, 1, asArray.Length - 1);
-                if (asArray[1] is LispConsCell) return new Lambda(env, (LispConsCell)asArray[1], this.Skip(2).ToList());
-                throw new LispListExpectedException(asArray[1]);
-            }
+            if (ifSym.Equals(car)) return EvalIf(env);
+            if (prognSym.Equals(car)) return EvalProgn(env);
+            if (defineSym.Equals(car)) return EvalDefine(env);
+            if (setSym.Equals(car)) return EvalSet(env);
+            if (lambdaSym.Equals(car)) return EvalLambda(env);
+            if (defunSym.Equals(car)) return EvalDefun(env);
+            return EvalCall(env);
+        }
 
+        private LispObject EvalIf(Environment env)
+        {
+            var asArray = this.ToArray();
+            if (asArray.Length != 4) throw new LispExpectedNParametersGotMException(car, 3, asArray.Length - 1);
+            return asArray[1].Eval(env).IsTrue() ? asArray[2].Eval(env) : asArray[3].Eval(env);
+        }
+
+        private LispObject EvalProgn(Environment env)
+        {
+            var asArray = this.ToArray();
+            if (asArray.Length == 1) return LispNil.GetInstance();
+            for (int i = 1; i < asArray.Length - 1; ++i) asArray[i].Eval(env);
+            return asArray[asArray.Length - 1].Eval(env);
+        }
+
+        private LispObject EvalDefine(Environment env)
+        {
+            var asArray = this.ToArray();
+            if (asArray.Length != 3) throw new LispExpectedNParametersGotMException(car, 2, asArray.Length - 1);
+            if (asArray[1] is LispSymbol) return env.Define((LispSymbol)asArray[1], asArray[2].Eval(env));
+            throw new LispSymbolExpectedException(asArray[1]);
+        }
+
+        private LispObject EvalSet(Environment env)
+        {
+            var asArray = this.ToArray();
+            if (asArray.Length != 3) throw new LispExpectedNParametersGotMException(car, 2, asArray.Length - 1);
+            if (asArray[1] is LispSymbol) return env.Set((LispSymbol)asArray[1], asArray[2].Eval(env));
+            throw new LispSymbolExpectedException(asArray[1]);
+        }
+
+        private LispObject EvalLambda(Environment env)
+        {
+            var asArray = this.ToArray();
+            if (asArray.Length < 2) throw new LispExpectedAtLeastNParametersGotMException(car, 1, asArray.Length - 1);
+            if (asArray[1] is LispConsCell) return new Lambda(env, (LispConsCell)asArray[1], this.Skip(2).ToList());
+            if (asArray[1] is LispNil) return new Lambda(env, new LispObject[] { }, this.Skip(2).ToList());
+            throw new LispListExpectedException(asArray[1]);
+        }
+
+        private LispObject EvalDefun(Environment env)
+        {
+            var asArray = this.ToArray();
+            if (asArray.Length < 4) throw new LispExpectedAtLeastNParametersGotMException(car, 3, asArray.Length - 1);
+            if (!(asArray[1] is LispSymbol)) throw new LispSymbolExpectedException(asArray[1]);
+            if (asArray[2] is LispConsCell) return env.Define((LispSymbol)asArray[1], new Lambda(env, (LispConsCell)asArray[2], this.Skip(3).ToList()));
+            if (asArray[2] is LispNil) return env.Define((LispSymbol)asArray[1], new Lambda(env, new LispObject[] { }, this.Skip(3).ToList()));
+            throw new LispListExpectedException(asArray[2]);
+        }
+
+        private LispObject EvalCall(Environment env)
+        {
             var f = car.Eval(env);
             if (f is LispFunction) return ((LispFunction)f).Call(this.Skip(1).Select(o => o.Eval(env)).ToList());
-
             throw new LispUndefinedFunctionException(car);
         }
 
@@ -348,7 +432,6 @@ namespace org.lb.NLisp
 
     internal abstract class LispFunction : LispObject
     {
-        public override bool IsTrue() { return true; }
         public override LispObject Eval(Environment env) { return this; }
         public abstract LispObject Call(List<LispObject> parameters);
     }
@@ -436,7 +519,7 @@ namespace org.lb.NLisp
             if (c == '\'')
             {
                 reader.Read();
-                return new LispConsCell(LispSymbol.fromString("quote"), new LispConsCell(Read(), LispNil.GetInstance()));
+                return LispConsCell.Cons(LispSymbol.fromString("quote"), LispConsCell.Cons(Read(), LispNil.GetInstance()));
             }
             if (c == '(') return ReadCons();
             if (c == '"') return ReadString();
@@ -550,47 +633,35 @@ namespace org.lb.NLisp
 
     internal static class LispStandardFunctions
     {
+        public static LispObject Length(LispObject obj)
+        {
+            if (obj is IEnumerable<LispObject>) return LispObject.FromClrObject(((IEnumerable<LispObject>)obj).Count());
+            throw new LispInvalidOperationException(obj, "length");
+        }
+
         public static LispObject Reverse(LispObject list)
         {
+            if (list is LispString) return LispObject.FromClrObject(string.Join("", ((LispString)list).Value.Reverse().ToArray()));
+
             LispObject ret = LispNil.GetInstance();
             while (!list.NullP())
             {
-                ret = new LispConsCell(list.Car(), ret);
+                ret = LispConsCell.Cons(list.Car(), ret);
                 list = list.Cdr();
                 if (list is LispNil) break;
-                if (!(list is LispConsCell)) return new LispConsCell(list, ret);
+                if (!(list is LispConsCell)) return LispConsCell.Cons(list, ret);
             }
             return ret;
         }
     }
 
-    internal sealed class BuiltinCarFunction : BuiltinLispFunction
+    internal sealed class BuiltinGensymFunction : BuiltinLispFunction
     {
-        public BuiltinCarFunction() : base("car") { }
+        public BuiltinGensymFunction() : base("gensym") { }
         public override LispObject Call(List<LispObject> parameters)
         {
-            AssertParameterCount(parameters, 1);
-            return parameters[0].Car();
-        }
-    }
-
-    internal sealed class BuiltinCdrFunction : BuiltinLispFunction
-    {
-        public BuiltinCdrFunction() : base("cdr") { }
-        public override LispObject Call(List<LispObject> parameters)
-        {
-            AssertParameterCount(parameters, 1);
-            return parameters[0].Cdr();
-        }
-    }
-
-    internal sealed class BuiltinConsFunction : BuiltinLispFunction
-    {
-        public BuiltinConsFunction() : base("cons") { }
-        public override LispObject Call(List<LispObject> parameters)
-        {
-            AssertParameterCount(parameters, 2);
-            return new LispConsCell(parameters[0], parameters[1]);
+            AssertParameterCount(parameters, 0);
+            return LispSymbol.Gensym();
         }
     }
 
@@ -600,29 +671,7 @@ namespace org.lb.NLisp
         public override LispObject Call(List<LispObject> parameters) { return FromClrObject(parameters); }
     }
 
-    internal sealed class BuiltinReverseFunction : BuiltinLispFunction
-    {
-        public BuiltinReverseFunction() : base("reverse") { }
-        public override LispObject Call(List<LispObject> parameters)
-        {
-            AssertParameterCount(parameters, 1);
-            return LispStandardFunctions.Reverse(parameters[0]);
-        }
-    }
-
-    internal sealed class BuiltinPrintFunction : BuiltinLispFunction
-    {
-        private readonly Lisp interp;
-        public BuiltinPrintFunction(Lisp interp) : base("print") { this.interp = interp; }
-        public override LispObject Call(List<LispObject> parameters)
-        {
-            AssertParameterCount(parameters, 1);
-            interp.print(parameters[0]);
-            return parameters[0];
-        }
-    }
-
-    internal sealed class BuiltinMapFunction : BuiltinLispFunction
+    internal sealed class BuiltinMapFunction : BuiltinLispFunction // TODO: Strings
     {
         public BuiltinMapFunction() : base("map") { }
         public override LispObject Call(List<LispObject> parameters)
@@ -632,7 +681,7 @@ namespace org.lb.NLisp
             LispFunction f = (LispFunction)parameters[0];
             var p = new List<LispObject>();
             p.Add(LispNil.GetInstance());
-            foreach (var i in (LispConsCell)parameters[1])
+            foreach (var i in (IEnumerable<LispObject>)parameters[1])
             {
                 p[0] = i;
                 ret.Add(f.Call(p));
@@ -641,7 +690,7 @@ namespace org.lb.NLisp
         }
     }
 
-    internal sealed class BuiltinFilterFunction : BuiltinLispFunction
+    internal sealed class BuiltinFilterFunction : BuiltinLispFunction // TODO: Strings
     {
         public BuiltinFilterFunction() : base("filter") { }
         public override LispObject Call(List<LispObject> parameters)
@@ -651,7 +700,7 @@ namespace org.lb.NLisp
             LispFunction f = (LispFunction)parameters[0];
             var p = new List<LispObject>();
             p.Add(LispNil.GetInstance());
-            foreach (var i in (LispConsCell)parameters[1])
+            foreach (var i in (IEnumerable<LispObject>)parameters[1])
             {
                 p[0] = i;
                 if (f.Call(p).IsTrue()) ret.Add(i);
@@ -660,16 +709,38 @@ namespace org.lb.NLisp
         }
     }
 
-    internal sealed class BuiltinAllFunction : BuiltinLispFunction
+    internal sealed class BuiltinReduceFunction : BuiltinLispFunction
     {
-        public BuiltinAllFunction() : base("allp") { } // TODO: Name?
+        public BuiltinReduceFunction() : base("reduce") { }
         public override LispObject Call(List<LispObject> parameters)
         {
             AssertParameterCount(parameters, 2);
             LispFunction f = (LispFunction)parameters[0];
             var p = new List<LispObject>();
             p.Add(LispNil.GetInstance());
-            foreach (var i in (LispConsCell)parameters[1])
+            p.Add(LispNil.GetInstance());
+            var values = (IEnumerable<LispObject>)parameters[1];
+            var acc = values.First();
+            foreach (var i in values.Skip(1))
+            {
+                p[0] = acc;
+                p[1] = i;
+                acc = f.Call(p);
+            }
+            return FromClrObject(acc);
+        }
+    }
+
+    internal sealed class BuiltinAllFunction : BuiltinLispFunction
+    {
+        public BuiltinAllFunction() : base("all") { }
+        public override LispObject Call(List<LispObject> parameters)
+        {
+            AssertParameterCount(parameters, 2);
+            LispFunction f = (LispFunction)parameters[0];
+            var p = new List<LispObject>();
+            p.Add(LispNil.GetInstance());
+            foreach (var i in (IEnumerable<LispObject>)parameters[1])
             {
                 p[0] = i;
                 if (f.Call(p).IsTrue()) continue;
@@ -679,118 +750,83 @@ namespace org.lb.NLisp
         }
     }
 
+    internal sealed class BuiltinAnyFunction : BuiltinLispFunction
+    {
+        public BuiltinAnyFunction() : base("any") { }
+        public override LispObject Call(List<LispObject> parameters)
+        {
+            AssertParameterCount(parameters, 2);
+            LispFunction f = (LispFunction)parameters[0];
+            var p = new List<LispObject>();
+            p.Add(LispNil.GetInstance());
+            foreach (var i in (IEnumerable<LispObject>)parameters[1])
+            {
+                p[0] = i;
+                if (!f.Call(p).IsTrue()) continue;
+                return LispT.GetInstance();
+            }
+            return LispNil.GetInstance();
+        }
+    }
+
     internal sealed class BuiltinRangeFunction : BuiltinLispFunction
     {
         public BuiltinRangeFunction() : base("range") { }
         public override LispObject Call(List<LispObject> parameters)
         {
-            int start = 0;
-            int count;
+            int from = 0;
+            int to;
             int step = 1;
             AssertParameterCountAtLeast(parameters, 1);
             switch (parameters.Count)
             {
                 case 1:
-                    count = (int)((LispNumber)parameters[0]).Number;
+                    to = ((LispNumber)parameters[0]).NumberAsInt;
                     break;
                 case 2:
-                    start = (int)((LispNumber)parameters[0]).Number;
-                    count = (int)((LispNumber)parameters[1]).Number;
+                    from = ((LispNumber)parameters[0]).NumberAsInt;
+                    to = ((LispNumber)parameters[1]).NumberAsInt;
                     break;
                 default:
-                    start = (int)((LispNumber)parameters[0]).Number;
-                    count = (int)((LispNumber)parameters[1]).Number;
-                    step = (int)((LispNumber)parameters[2]).Number;
+                    from = ((LispNumber)parameters[0]).NumberAsInt;
+                    to = ((LispNumber)parameters[1]).NumberAsInt;
+                    step = ((LispNumber)parameters[2]).NumberAsInt;
                     break;
             }
 
             var ret = new List<LispObject>();
-            int value = start;
-            for (int i = 0; i < count; i++)
-            {
-                ret.Add(FromClrObject(value));
-                value += step;
-            }
+            for (int i = from; i < to; i += step) ret.Add(new LispNumber(i));
             return FromClrObject(ret);
         }
     }
 
-    internal abstract class BuiltinBinaryOperationFunction : BuiltinLispFunction
+    internal sealed class BuiltinUnaryOperationFunction : BuiltinLispFunction
     {
-        protected BuiltinBinaryOperationFunction(string name) : base(name) { }
-        protected abstract LispObject PerformOperation(LispObject o1, LispObject o2);
+        private readonly Func<LispObject, LispObject> op;
+        public BuiltinUnaryOperationFunction(string name, Func<LispObject, LispObject> op) : base(name) { this.op = op; }
         public override LispObject Call(List<LispObject> parameters)
         {
-            AssertParameterCount(parameters, 2);
-            return PerformOperation(parameters[0], parameters[1]);
+            AssertParameterCount(parameters, 1);
+            return op(parameters[0]);
         }
     }
 
-    internal sealed class BuiltinAdditionFunction : BuiltinBinaryOperationFunction
+    internal sealed class BuiltinBinaryOperationFunction : BuiltinLispFunction
     {
-        public BuiltinAdditionFunction() : base("+") { }
-        protected override LispObject PerformOperation(LispObject o1, LispObject o2) { return FromClrObject(((LispNumber)o1).Number + ((LispNumber)o2).Number); }
-    }
-
-    internal sealed class BuiltinSubtractionFunction : BuiltinBinaryOperationFunction
-    {
-        public BuiltinSubtractionFunction() : base("-") { }
-        protected override LispObject PerformOperation(LispObject o1, LispObject o2) { return FromClrObject(((LispNumber)o1).Number - ((LispNumber)o2).Number); }
-    }
-
-    internal sealed class BuiltinMultiplicationFunction : BuiltinBinaryOperationFunction
-    {
-        public BuiltinMultiplicationFunction() : base("*") { }
-        protected override LispObject PerformOperation(LispObject o1, LispObject o2) { return FromClrObject(((LispNumber)o1).Number * ((LispNumber)o2).Number); }
-    }
-
-    internal sealed class BuiltinDivisionFunction : BuiltinBinaryOperationFunction
-    {
-        public BuiltinDivisionFunction() : base("/") { }
-        protected override LispObject PerformOperation(LispObject o1, LispObject o2) { return FromClrObject(((LispNumber)o1).Number / ((LispNumber)o2).Number); }
-    }
-
-    internal sealed class BuiltinRemainderFunction : BuiltinBinaryOperationFunction
-    {
-        public BuiltinRemainderFunction() : base("rem") { }
-        protected override LispObject PerformOperation(LispObject o1, LispObject o2) { return FromClrObject(((LispNumber)o1).Number % ((LispNumber)o2).Number); }
-    }
-
-    internal sealed class BuiltinNumericalEqualFunction : BuiltinBinaryOperationFunction
-    {
-        public BuiltinNumericalEqualFunction() : base("=") { }
-        protected override LispObject PerformOperation(LispObject o1, LispObject o2) { return FromClrObject(((LispNumber)o1).Number == ((LispNumber)o2).Number); }
-    }
-
-    internal sealed class BuiltinNumericalGreaterFunction : BuiltinBinaryOperationFunction
-    {
-        public BuiltinNumericalGreaterFunction() : base(">") { }
-        protected override LispObject PerformOperation(LispObject o1, LispObject o2) { return FromClrObject(((LispNumber)o1).Number > ((LispNumber)o2).Number); }
-    }
-
-    internal sealed class BuiltinNumericalLesserFunction : BuiltinBinaryOperationFunction
-    {
-        public BuiltinNumericalLesserFunction() : base("<") { }
-        protected override LispObject PerformOperation(LispObject o1, LispObject o2) { return FromClrObject(((LispNumber)o1).Number < ((LispNumber)o2).Number); }
-    }
-
-    internal sealed class BuiltinNumericalGEFunction : BuiltinBinaryOperationFunction
-    {
-        public BuiltinNumericalGEFunction() : base(">=") { }
-        protected override LispObject PerformOperation(LispObject o1, LispObject o2) { return FromClrObject(((LispNumber)o1).Number >= ((LispNumber)o2).Number); }
-    }
-
-    internal sealed class BuiltinNumericalLEFunction : BuiltinBinaryOperationFunction
-    {
-        public BuiltinNumericalLEFunction() : base("<=") { }
-        protected override LispObject PerformOperation(LispObject o1, LispObject o2) { return FromClrObject(((LispNumber)o1).Number <= ((LispNumber)o2).Number); }
+        private readonly Func<LispObject, LispObject, LispObject> op;
+        public BuiltinBinaryOperationFunction(string name, Func<LispObject, LispObject, LispObject> op) : base(name) { this.op = op; }
+        public override LispObject Call(List<LispObject> parameters)
+        {
+            AssertParameterCount(parameters, 2);
+            return op(parameters[0], parameters[1]);
+        }
     }
 
     #endregion
 
-    #region Interface
+    #region User Interface
 
-    public sealed class Lisp
+    internal sealed class Lisp
     {
         private readonly Environment global = new Environment();
 
@@ -798,34 +834,46 @@ namespace org.lb.NLisp
 
         public Lisp()
         {
-            SetVariable("cons", new BuiltinConsFunction());
-            SetVariable("car", new BuiltinCarFunction());
-            SetVariable("cdr", new BuiltinCdrFunction());
             SetVariable("list", new BuiltinListFunction());
-            SetVariable("reverse", new BuiltinReverseFunction());
             SetVariable("map", new BuiltinMapFunction());
             SetVariable("filter", new BuiltinFilterFunction());
-            SetVariable("allp", new BuiltinAllFunction());
+            SetVariable("reduce", new BuiltinReduceFunction());
+            SetVariable("all", new BuiltinAllFunction());
+            SetVariable("any", new BuiltinAnyFunction());
             SetVariable("range", new BuiltinRangeFunction());
-            SetVariable("+", new BuiltinAdditionFunction());
-            SetVariable("-", new BuiltinSubtractionFunction());
-            SetVariable("*", new BuiltinMultiplicationFunction());
-            SetVariable("/", new BuiltinDivisionFunction());
-            SetVariable("rem", new BuiltinRemainderFunction());
-            SetVariable("=", new BuiltinNumericalEqualFunction());
-            SetVariable(">", new BuiltinNumericalGreaterFunction());
-            SetVariable("<", new BuiltinNumericalLesserFunction());
-            SetVariable(">=", new BuiltinNumericalGEFunction());
-            SetVariable("<=", new BuiltinNumericalLEFunction());
-            SetVariable("print", new BuiltinPrintFunction(this));
+            SetVariable("gensym", new BuiltinGensymFunction());
+
+            AddUnaryFunction("car", obj => obj.Car());
+            AddUnaryFunction("cdr", obj => obj.Cdr());
+            AddUnaryFunction("not", obj => LispObject.FromClrObject(!obj.IsTrue()));
+            AddUnaryFunction("nullp", obj => LispObject.FromClrObject(obj.NullP()));
+            AddUnaryFunction("consp", obj => LispObject.FromClrObject(obj is LispConsCell));
+            AddUnaryFunction("symbolp", obj => LispObject.FromClrObject(obj is LispSymbol));
+            AddUnaryFunction("length", LispStandardFunctions.Length);
+            AddUnaryFunction("reverse", LispStandardFunctions.Reverse);
+            AddUnaryFunction("print", obj => { Print(obj.ToString()); return obj; });
+
+            AddBinaryFunction("eq", (o1, o2) => LispObject.FromClrObject((o1 == o2) || (o1 is LispNumber && o1.Equals(o2))));
+            AddBinaryFunction("cons", LispConsCell.Cons);
+            AddBinaryFunction("+", (o1, o2) => o1.Add(o2));
+            AddBinaryFunction("-", (o1, o2) => o1.Sub(o2));
+            AddBinaryFunction("*", (o1, o2) => o1.Mul(o2));
+            AddBinaryFunction("/", (o1, o2) => o1.Div(o2));
+            AddBinaryFunction("rem", (o1, o2) => o1.Rem(o2));
+            AddBinaryFunction("=", (o1, o2) => o1.NumEq(o2));
+            AddBinaryFunction("<", (o1, o2) => o1.Lt(o2));
+            AddBinaryFunction(">", (o1, o2) => o1.Gt(o2));
+            AddBinaryFunction("<=", (o1, o2) => o1.Le(o2));
+            AddBinaryFunction(">=", (o1, o2) => o1.Ge(o2));
         }
 
         public object Evaluate(string expression) { return new Reader(new StringReader(expression)).Read().Eval(global); }
         public object EvaluateScript(string[] script) { return Evaluate("(progn " + string.Join("\n", script) + ")"); }
         public void SetVariable(string identifier, object value) { global.Define(LispSymbol.fromString(identifier), LispObject.FromClrObject(value)); }
         public void AddFunction(string identifier, Delegate f) { SetVariable(identifier, f); }
-        public string ObjectToString(object value) { return value.ToString(); }
-        internal void print(LispObject lispObject) { Print(lispObject.ToString()); }
+
+        private void AddUnaryFunction(string name, Func<LispObject, LispObject> op) { SetVariable(name, new BuiltinUnaryOperationFunction(name, op)); }
+        private void AddBinaryFunction(string name, Func<LispObject, LispObject, LispObject> op) { SetVariable(name, new BuiltinBinaryOperationFunction(name, op)); }
     }
 
     #endregion

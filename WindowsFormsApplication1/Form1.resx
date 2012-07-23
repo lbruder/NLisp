@@ -118,19 +118,14 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="textBox2.Text" xml:space="preserve">
-    <value>(define primetest (lambda (n i)
-  (if (&gt;= i n)
-      t
-      (if (= 0 (rem n i))
-          nil
-          (primetest n (+ i 2))))))
-
-(define primep (lambda (n)
-  (if (&lt; n 4)
-      (&gt; n 1)
-      (if (= 0 (rem n 2))
-          nil
-          (primetest n 3)))))
+    <value>(defun primep (n)
+    (if (&lt; n 4)
+        (&gt; n 1)
+        (if (= 0 (rem n 2))
+            nil
+            (all
+              (lambda (i) (&lt; 0 (rem n i)))
+              (range 3 n 2)))))
 
 (print (filter primep (range 1000)))</value>
   </data>

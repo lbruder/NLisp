@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Windows.Forms;
 using org.lb.NLisp;
 
@@ -30,7 +31,7 @@ namespace WindowsFormsApplication1
             try
             {
                 Print("> run");
-                lisp.EvaluateScript(textBox2.Lines);
+                Measure(() => lisp.EvaluateScript(textBox2.Lines));
                 textBox3.Focus();
             }
             catch (Exception ex)
@@ -46,7 +47,7 @@ namespace WindowsFormsApplication1
                 try
                 {
                     Print("> " + textBox3.Text);
-                    Print(lisp.ObjectToString(lisp.Evaluate(textBox3.Text)));
+                    Measure(() => { Print(lisp.Evaluate(textBox3.Text).ToString()); return 0; });
                     textBox3.Text = "";
                 }
                 catch (Exception ex)
@@ -56,10 +57,19 @@ namespace WindowsFormsApplication1
             }
         }
 
-        public void Print(string what)
+        private void Print(string what)
         {
             textBox1.AppendText(what + "\r\n");
             textBox1.ScrollToCaret();
+        }
+
+        void Measure<T>(Func<T> f)
+        {
+            var s1 = new Stopwatch();
+            s1.Start();
+            f();
+            s1.Stop();
+            Print(s1.Elapsed.ToString());
         }
     }
 }
