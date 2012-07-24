@@ -9,8 +9,7 @@ using System.Text;
 namespace org.lb.NLisp
 {
     // TODO:
-    // - defun and lambda with &rest parameters
-    // - defmacro
+    // - augment lambda with &rest parameters
     // - quasiquoting
     // - some basic(!) kind of while... loop
 
@@ -168,7 +167,7 @@ namespace org.lb.NLisp
             if (source is LispObject) return (LispObject)source;
             if (source is bool) return ((bool)source) ? (LispObject)LispT.GetInstance() : LispNil.GetInstance();
             if (source is byte) return new LispNumber((byte)source);
-            if (source is char) return new LispString(source.ToString()); // TODO: LispChar type
+            if (source is char) return new LispString(source.ToString()); // TODO: LispChar type?
             if (source is short) return new LispNumber((short)source);
             if (source is ushort) return new LispNumber((ushort)source);
             if (source is int) return new LispNumber((int)source);
@@ -200,7 +199,7 @@ namespace org.lb.NLisp
         public override bool NullP() { return true; }
         public override bool IsTrue() { return false; }
         public override LispObject Eval(Environment env) { throw new LispCannotEvaluateEmptyListException(); }
-        public override string ToString() { return "()"; }
+        public override string ToString() { return "NIL"; }
         public override bool Equals(object obj) { return obj is LispNil; }
         public override int GetHashCode() { return 4711; }
     }
@@ -211,7 +210,7 @@ namespace org.lb.NLisp
         private LispT() { }
         public static LispT GetInstance() { return instance; }
         public override LispObject Eval(Environment env) { return this; }
-        public override string ToString() { return "t"; }
+        public override string ToString() { return "T"; }
         public override bool Equals(object obj) { return obj is LispT; }
         public override int GetHashCode() { return 0815; }
     }
@@ -307,6 +306,13 @@ namespace org.lb.NLisp
         public static LispConsCell Cons(LispObject car, LispObject cdr) { return new LispConsCell(car, cdr); }
         public override LispObject Car() { return car; }
         public override LispObject Cdr() { return cdr; }
+        public override LispObject Add(LispObject other) { var list = this.ToList(); list.AddRange(OtherConsCell(other, "+")); return FromClrObject(list); }
+        private LispConsCell OtherConsCell(LispObject other, string op)
+        {
+            LispConsCell n = other as LispConsCell;
+            if (n == null) throw new LispInvalidOperationException(this, other, op);
+            return n;
+        }
 
         public override LispObject Eval(Environment env)
         {
@@ -498,11 +504,22 @@ namespace org.lb.NLisp
 
     internal sealed class Reader
     {
-        private readonly TextReader reader;
+        private static readonly LispSymbol defmacroSymbol = LispSymbol.fromString("defmacro");
+        private static readonly LispSymbol quoteSymbol = LispSymbol.fromString("quote");
+        private readonly HashSet<LispSymbol> macros = new HashSet<LispSymbol>();
+        private readonly Lisp lisp;
+        private TextReader reader;
 
-        public Reader(TextReader reader)
+        private enum Mode
         {
-            this.reader = reader;
+            normal,
+            quoting,
+            //TODO: quasiquoting
+        }
+
+        public Reader(Lisp lisp)
+        {
+            this.lisp = lisp;
         }
 
         private char Peek()
@@ -512,16 +529,22 @@ namespace org.lb.NLisp
             return (char)p;
         }
 
-        public LispObject Read()
+        public LispObject Read(TextReader rd)
+        {
+            reader = rd;
+            return Read(Mode.normal);
+        }
+
+        private LispObject Read(Mode mode)
         {
             SkipWhitespace();
             char c = Peek();
             if (c == '\'')
             {
                 reader.Read();
-                return LispConsCell.Cons(LispSymbol.fromString("quote"), LispConsCell.Cons(Read(), LispNil.GetInstance()));
+                return LispConsCell.Cons(quoteSymbol, LispConsCell.Cons(Read(Mode.quoting), LispNil.GetInstance()));
             }
-            if (c == '(') return ReadCons();
+            if (c == '(') return ReadCons(mode);
             if (c == '"') return ReadString();
             if (char.IsDigit(c)) return ReadNumber();
             return ReadSymbol();
@@ -532,18 +555,41 @@ namespace org.lb.NLisp
             while (Char.IsWhiteSpace(Peek())) reader.Read();
         }
 
-        private LispObject ReadCons()
+        private LispObject ReadCons(Mode mode)
         {
             var ret = new List<LispObject>();
             reader.Read(); // Opening parenthesis
             SkipWhitespace();
             while (Peek() != ')')
             {
-                ret.Add(Read());
+                ret.Add(Read(mode));
                 SkipWhitespace();
             }
             reader.Read(); // Closing parenthesis
-            return LispObject.FromClrObject(ret);
+            return EvalMacros(mode, ret);
+        }
+
+        private LispObject EvalMacros(Mode mode, List<LispObject> list)
+        {
+            if (mode == Mode.normal && list.Count > 0 && list[0] is LispSymbol)
+            {
+                LispSymbol symbol = (LispSymbol)list[0];
+                if (defmacroSymbol.Equals(symbol))
+                {
+                    list[0] = LispSymbol.fromString("defun");
+                    macros.Add((LispSymbol)list[1]);
+                    lisp.Eval(list);
+                    return LispT.GetInstance();
+                }
+                if (macros.Contains(symbol))
+                {
+                    // Quote all parameters to prevent premature evaluation
+                    for (int i = 1; i < list.Count; ++i)
+                        list[i] = LispConsCell.Cons(quoteSymbol, LispConsCell.Cons(list[i], LispNil.GetInstance()));
+                    return lisp.Eval(list);
+                }
+            }
+            return LispObject.FromClrObject(list);
         }
 
         private LispObject ReadString()
@@ -829,11 +875,14 @@ namespace org.lb.NLisp
     internal sealed class Lisp
     {
         private readonly Environment global = new Environment();
+        private readonly Reader reader;
 
         public event Action<string> Print = delegate { };
 
         public Lisp()
         {
+            reader = new Reader(this);
+
             SetVariable("list", new BuiltinListFunction());
             SetVariable("map", new BuiltinMapFunction());
             SetVariable("filter", new BuiltinFilterFunction());
@@ -845,6 +894,10 @@ namespace org.lb.NLisp
 
             AddUnaryFunction("car", obj => obj.Car());
             AddUnaryFunction("cdr", obj => obj.Cdr());
+            AddUnaryFunction("caar", obj => obj.Car().Car());
+            AddUnaryFunction("cadr", obj => obj.Cdr().Car());
+            AddUnaryFunction("cdar", obj => obj.Car().Cdr());
+            AddUnaryFunction("cddr", obj => obj.Cdr().Cdr());
             AddUnaryFunction("not", obj => LispObject.FromClrObject(!obj.IsTrue()));
             AddUnaryFunction("nullp", obj => LispObject.FromClrObject(obj.NullP()));
             AddUnaryFunction("consp", obj => LispObject.FromClrObject(obj is LispConsCell));
@@ -867,8 +920,10 @@ namespace org.lb.NLisp
             AddBinaryFunction(">=", (o1, o2) => o1.Ge(o2));
         }
 
-        public object Evaluate(string expression) { return new Reader(new StringReader(expression)).Read().Eval(global); }
-        public object EvaluateScript(string[] script) { return Evaluate("(progn " + string.Join("\n", script) + ")"); }
+        public LispObject Evaluate(string expression) { return reader.Read(new StringReader(expression)).Eval(global); }
+        public LispObject EvaluateScript(string[] script) { return Evaluate("(progn " + string.Join("\n", script) + ")"); }
+        internal LispObject Eval(List<LispObject> ast) { return LispObject.FromClrObject(ast).Eval(global); }
+
         public void SetVariable(string identifier, object value) { global.Define(LispSymbol.fromString(identifier), LispObject.FromClrObject(value)); }
         public void AddFunction(string identifier, Delegate f) { SetVariable(identifier, f); }
 

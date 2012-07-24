@@ -118,10 +118,13 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="textBox2.Text" xml:space="preserve">
-    <value>(defun primep (n)
+    <value>(defmacro even-macro (x)
+  (list '= 0 (list 'rem x 2)))
+
+(defun primep (n)
     (if (&lt; n 4)
         (&gt; n 1)
-        (if (= 0 (rem n 2))
+        (if (even-macro n)
             nil
             (all
               (lambda (i) (&lt; 0 (rem n i)))
