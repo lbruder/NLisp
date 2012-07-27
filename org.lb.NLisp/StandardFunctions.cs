@@ -10,7 +10,7 @@ namespace org.lb.NLisp
         public static LispObject Length(LispObject obj)
         {
             if (obj is IEnumerable<LispObject>) return LispObject.FromClrObject(((IEnumerable<LispObject>)obj).Count());
-            throw new LispInvalidOperationException(obj, "length");
+            throw new InvalidOperationException(obj, "length");
         }
 
         public static LispObject Reverse(LispObject list)

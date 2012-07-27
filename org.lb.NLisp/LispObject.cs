@@ -8,16 +8,16 @@ namespace org.lb.NLisp
         public virtual bool IsTrue() { return true; }
         internal virtual bool NullP() { return false; }
         internal virtual LispObject Eval(Environment env) { return Nil.GetInstance(); }
-        internal virtual LispObject Car() { throw new LispObjectIsNotAListException(this); }
-        internal virtual LispObject Cdr() { throw new LispObjectIsNotAListException(this); }
-        internal virtual LispObject Add(LispObject other) { throw new LispInvalidOperationException(this, other, "+"); }
-        internal virtual LispObject Sub(LispObject other) { throw new LispInvalidOperationException(this, other, "-"); }
-        internal virtual LispObject Mul(LispObject other) { throw new LispInvalidOperationException(this, other, "*"); }
-        internal virtual LispObject Div(LispObject other) { throw new LispInvalidOperationException(this, other, "/"); }
-        internal virtual LispObject Mod(LispObject other) { throw new LispInvalidOperationException(this, other, "mod"); }
-        internal virtual LispObject NumEq(LispObject other) { throw new LispInvalidOperationException(this, other, "="); }
-        internal virtual LispObject Gt(LispObject other) { throw new LispInvalidOperationException(this, other, ">"); }
-        internal virtual LispObject Lt(LispObject other) { throw new LispInvalidOperationException(this, other, "<"); }
+        internal virtual LispObject Car() { throw new ObjectIsNotAListException(this); }
+        internal virtual LispObject Cdr() { throw new ObjectIsNotAListException(this); }
+        internal virtual LispObject Add(LispObject other) { throw new InvalidOperationException(this, other, "+"); }
+        internal virtual LispObject Sub(LispObject other) { throw new InvalidOperationException(this, other, "-"); }
+        internal virtual LispObject Mul(LispObject other) { throw new InvalidOperationException(this, other, "*"); }
+        internal virtual LispObject Div(LispObject other) { throw new InvalidOperationException(this, other, "/"); }
+        internal virtual LispObject Mod(LispObject other) { throw new InvalidOperationException(this, other, "mod"); }
+        internal virtual LispObject NumEq(LispObject other) { throw new InvalidOperationException(this, other, "="); }
+        internal virtual LispObject Gt(LispObject other) { throw new InvalidOperationException(this, other, ">"); }
+        internal virtual LispObject Lt(LispObject other) { throw new InvalidOperationException(this, other, "<"); }
 
         public static LispObject FromClrObject(object source)
         {
@@ -43,7 +43,7 @@ namespace org.lb.NLisp
                 return ret;
             }
             if (source is Delegate) return new LispFunctionProxy(source as Delegate);
-            throw new LispObjectCouldNotBeConvertedException(source);
+            throw new ObjectCouldNotBeConvertedException(source);
         }
     }
 
@@ -56,7 +56,7 @@ namespace org.lb.NLisp
         internal override LispObject Cdr() { return this; }
         internal override bool NullP() { return true; }
         public override bool IsTrue() { return false; }
-        internal override LispObject Eval(Environment env) { throw new LispCannotEvaluateEmptyListException(); }
+        internal override LispObject Eval(Environment env) { throw new CannotEvaluateEmptyListException(); }
         public override string ToString() { return "NIL"; }
         public override bool Equals(object obj) { return obj is Nil; }
         public override int GetHashCode() { return 4711; }

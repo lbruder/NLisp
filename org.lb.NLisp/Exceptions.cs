@@ -4,110 +4,118 @@ namespace org.lb.NLisp
 {
     // TODO: New base classes LispException, LispRuntimeError, LispCliError
 
-    public sealed class LispConstantCanNotBeChangedException : Exception
+    public sealed class ConstantCanNotBeChangedException : Exception
     {
-        internal LispConstantCanNotBeChangedException(Symbol sym)
+        internal ConstantCanNotBeChangedException(Symbol sym)
             : base(sym + " is a constant and can not be changed") // TODO: I18N
         {
         }
     }
 
-    public sealed class LispCannotEvaluateEmptyListException : Exception
+    public sealed class CannotEvaluateEmptyListException : Exception
     {
-        internal LispCannotEvaluateEmptyListException()
+        internal CannotEvaluateEmptyListException()
             : base("Can not evaluate empty list") // TODO: I18N
         {
         }
     }
 
-    public sealed class LispObjectCouldNotBeConvertedException : Exception
+    public sealed class ObjectCouldNotBeConvertedException : Exception
     {
-        internal LispObjectCouldNotBeConvertedException(object obj)
+        internal ObjectCouldNotBeConvertedException(object obj)
             : base("CLR object of type " + obj.GetType() + " could not be converted to LispObject") // TODO: I18N
         {
         }
     }
 
-    public sealed class LispObjectIsNotAListException : Exception
+    public sealed class ObjectIsNotAListException : Exception
     {
-        internal LispObjectIsNotAListException(object obj)
+        internal ObjectIsNotAListException(object obj)
             : base("The value " + obj + " is not a list") // TODO: I18N
         {
         }
     }
 
-    public sealed class LispInvalidOperationException : Exception
+    public sealed class InvalidOperationException : Exception
     {
-        internal LispInvalidOperationException(LispObject o1, string op)
+        internal InvalidOperationException(LispObject o1, string op)
             : base("Invalid operation: (" + op + " " + o1 + ")") // TODO: I18N
         {
         }
-        internal LispInvalidOperationException(LispObject o1, LispObject o2, string op)
+        internal InvalidOperationException(LispObject o1, LispObject o2, string op)
             : base("Invalid operation: (" + op + " " + o1 + " " + o2 + ")") // TODO: I18N
         {
         }
     }
 
-    public sealed class LispDivisionByZeroException : Exception
+    public sealed class DivisionByZeroException : Exception
     {
-        internal LispDivisionByZeroException()
+        internal DivisionByZeroException()
             : base("Division by zero") // TODO: I18N
         {
         }
     }
 
-    public sealed class LispUnexpectedEndOfStreamException : Exception
+    public sealed class UnexpectedEndOfStreamException : Exception
     {
-        internal LispUnexpectedEndOfStreamException()
+        internal UnexpectedEndOfStreamException()
             : base("Unexpected end of stream") // TODO: I18N
         {
         }
     }
 
-    public sealed class LispSymbolNotFoundException : Exception
+    public sealed class SymbolNotFoundException : Exception
     {
-        internal LispSymbolNotFoundException(Symbol symbol)
+        internal SymbolNotFoundException(Symbol symbol)
             : base("Undefined symbol " + symbol) // TODO: I18N
         {
         }
     }
 
-    public sealed class LispExpectedNParametersGotMException : Exception
+    public sealed class ExpectedNParametersGotMException : Exception
     {
-        internal LispExpectedNParametersGotMException(LispObject symbol, int expected, int got)
+        internal ExpectedNParametersGotMException(LispObject symbol, int expected, int got)
             : base(symbol + ": Expected " + expected + " parameter(s), got " + got) // TODO: I18N
         {
         }
     }
 
-    public sealed class LispExpectedAtLeastNParametersGotMException : Exception
+    public sealed class ExpectedAtLeastNParametersGotMException : Exception
     {
-        internal LispExpectedAtLeastNParametersGotMException(LispObject symbol, int expected, int got)
+        internal ExpectedAtLeastNParametersGotMException(LispObject symbol, int expected, int got)
             : base(symbol + ": Expected at least " + expected + " parameter(s), got " + got) // TODO: I18N
         {
         }
     }
 
-    public sealed class LispSymbolExpectedException : Exception
+    public sealed class SymbolExpectedException : Exception
     {
-        internal LispSymbolExpectedException(LispObject got)
+        internal SymbolExpectedException(LispObject got)
             : base("Expected symbol, got " + got) // TODO: I18N
         {
         }
     }
 
-    public sealed class LispListExpectedException : Exception
+    public sealed class ListExpectedException : Exception
     {
-        internal LispListExpectedException(LispObject got)
+        internal ListExpectedException(LispObject got)
             : base("Expected list, got " + got) // TODO: I18N
         {
         }
     }
 
-    public sealed class LispUndefinedFunctionException : Exception
+    public sealed class UndefinedFunctionException : Exception
     {
-        internal LispUndefinedFunctionException(LispObject got)
+        internal UndefinedFunctionException(LispObject got)
             : base("Undefined function " + got) // TODO: I18N
+        {
+        }
+    }
+
+    public sealed class RestSymbolNotAllowedHereException : Exception
+    {
+        internal RestSymbolNotAllowedHereException()
+            : base("&rest symbol not allowed here") // TODO: I18N
         {
         }
     }

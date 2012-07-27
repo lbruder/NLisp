@@ -29,7 +29,7 @@ namespace org.lb.NLisp
         private char Peek()
         {
             int p = reader.Peek();
-            if (p == -1) throw new LispUnexpectedEndOfStreamException();
+            if (p == -1) throw new UnexpectedEndOfStreamException();
             return (char)p;
         }
 

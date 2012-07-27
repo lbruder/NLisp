@@ -19,11 +19,11 @@ namespace org.lb.NLisp
         public override int GetHashCode() { return name.GetHashCode(); }
         protected void AssertParameterCount(List<LispObject> parameters, int expected)
         {
-            if (parameters.Count != expected) throw new LispExpectedNParametersGotMException(Symbol.fromString(name), expected, parameters.Count);
+            if (parameters.Count != expected) throw new ExpectedNParametersGotMException(Symbol.fromString(name), expected, parameters.Count);
         }
         protected void AssertParameterCountAtLeast(List<LispObject> parameters, int expected)
         {
-            if (parameters.Count < expected) throw new LispExpectedAtLeastNParametersGotMException(Symbol.fromString(name), expected, parameters.Count);
+            if (parameters.Count < expected) throw new ExpectedAtLeastNParametersGotMException(Symbol.fromString(name), expected, parameters.Count);
         }
     }
 
@@ -57,7 +57,9 @@ namespace org.lb.NLisp
         {
             outerEnvironment = env;
             this.parameterNames = parameterNames.Cast<Symbol>().ToArray();
-            this.hasRestParameter = this.parameterNames.Length >= 2 && restSym.Equals(this.parameterNames[this.parameterNames.Length - 2]);
+            int possibleRestParameterPosition = this.parameterNames.Length - 2;
+            this.hasRestParameter = possibleRestParameterPosition >= 0 && restSym.Equals(this.parameterNames[possibleRestParameterPosition]);
+            if (this.parameterNames.Where((t, i) => i != possibleRestParameterPosition).Contains(restSym)) throw new RestSymbolNotAllowedHereException();
             this.body = body;
         }
 

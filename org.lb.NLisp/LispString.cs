@@ -20,7 +20,7 @@ namespace org.lb.NLisp
         private string OtherString(LispObject other, string op)
         {
             LispString n = other as LispString;
-            if (n == null) throw new LispInvalidOperationException(this, other, op);
+            if (n == null) throw new InvalidOperationException(this, other, op);
             return n.value;
         }
         public IEnumerator<LispObject> GetEnumerator() { return value.Select(c => FromClrObject(c)).GetEnumerator(); }

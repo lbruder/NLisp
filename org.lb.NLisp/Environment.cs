@@ -22,7 +22,7 @@ namespace org.lb.NLisp
 
         public LispObject Define(Symbol symbol, LispObject value)
         {
-            if (tSym.Equals(symbol) || nilSym.Equals(symbol)) throw new LispConstantCanNotBeChangedException(symbol);
+            if (tSym.Equals(symbol) || nilSym.Equals(symbol)) throw new ConstantCanNotBeChangedException(symbol);
             values[symbol] = value;
             return value;
         }
@@ -30,7 +30,7 @@ namespace org.lb.NLisp
         public LispObject Set(Symbol symbol, LispObject value)
         {
             if (values.ContainsKey(symbol)) values[symbol] = value;
-            else if (outer == null) throw new LispSymbolNotFoundException(symbol);
+            else if (outer == null) throw new SymbolNotFoundException(symbol);
             else outer.Set(symbol, value);
             return value;
         }
@@ -39,7 +39,7 @@ namespace org.lb.NLisp
         {
             LispObject ret;
             if (values.TryGetValue(symbol, out ret)) return ret;
-            if (outer == null) throw new LispSymbolNotFoundException(symbol);
+            if (outer == null) throw new SymbolNotFoundException(symbol);
             return outer.Get(symbol);
         }
     }

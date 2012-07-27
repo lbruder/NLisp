@@ -26,7 +26,7 @@ namespace org.lb.NLisp
         private ConsCell OtherConsCell(LispObject other, string op)
         {
             ConsCell n = other as ConsCell;
-            if (n == null) throw new LispInvalidOperationException(this, other, op);
+            if (n == null) throw new InvalidOperationException(this, other, op);
             return n;
         }
 
@@ -46,7 +46,7 @@ namespace org.lb.NLisp
         private LispObject EvalIf(Environment env)
         {
             var asArray = this.ToArray();
-            if (asArray.Length != 4) throw new LispExpectedNParametersGotMException(car, 3, asArray.Length - 1);
+            if (asArray.Length != 4) throw new ExpectedNParametersGotMException(car, 3, asArray.Length - 1);
             return asArray[1].Eval(env).IsTrue() ? asArray[2].Eval(env) : asArray[3].Eval(env);
         }
 
@@ -61,42 +61,42 @@ namespace org.lb.NLisp
         private LispObject EvalDefine(Environment env)
         {
             var asArray = this.ToArray();
-            if (asArray.Length != 3) throw new LispExpectedNParametersGotMException(car, 2, asArray.Length - 1);
+            if (asArray.Length != 3) throw new ExpectedNParametersGotMException(car, 2, asArray.Length - 1);
             if (asArray[1] is Symbol) return env.Define((Symbol)asArray[1], asArray[2].Eval(env));
-            throw new LispSymbolExpectedException(asArray[1]);
+            throw new SymbolExpectedException(asArray[1]);
         }
 
         private LispObject EvalSet(Environment env)
         {
             var asArray = this.ToArray();
-            if (asArray.Length != 3) throw new LispExpectedNParametersGotMException(car, 2, asArray.Length - 1);
+            if (asArray.Length != 3) throw new ExpectedNParametersGotMException(car, 2, asArray.Length - 1);
             if (asArray[1] is Symbol) return env.Set((Symbol)asArray[1], asArray[2].Eval(env));
-            throw new LispSymbolExpectedException(asArray[1]);
+            throw new SymbolExpectedException(asArray[1]);
         }
 
         private LispObject EvalLambda(Environment env)
         {
             var asArray = this.ToArray();
-            if (asArray.Length < 2) throw new LispExpectedAtLeastNParametersGotMException(car, 1, asArray.Length - 1);
+            if (asArray.Length < 2) throw new ExpectedAtLeastNParametersGotMException(car, 1, asArray.Length - 1);
             if (asArray[1] is ConsCell) return new Lambda(env, (ConsCell)asArray[1], this.Skip(2).ToList());
             if (asArray[1] is Nil) return new Lambda(env, new LispObject[] { }, this.Skip(2).ToList());
-            throw new LispListExpectedException(asArray[1]);
+            throw new ListExpectedException(asArray[1]);
         }
 
         private LispObject EvalDefun(Environment env)
         {
             var asArray = this.ToArray();
-            if (asArray.Length < 4) throw new LispExpectedAtLeastNParametersGotMException(car, 3, asArray.Length - 1);
-            if (!(asArray[1] is Symbol)) throw new LispSymbolExpectedException(asArray[1]);
+            if (asArray.Length < 4) throw new ExpectedAtLeastNParametersGotMException(car, 3, asArray.Length - 1);
+            if (!(asArray[1] is Symbol)) throw new SymbolExpectedException(asArray[1]);
             if (asArray[2] is ConsCell) return env.Define((Symbol)asArray[1], new Lambda(env, (ConsCell)asArray[2], this.Skip(3).ToList()));
             if (asArray[2] is Nil) return env.Define((Symbol)asArray[1], new Lambda(env, new LispObject[] { }, this.Skip(3).ToList()));
-            throw new LispListExpectedException(asArray[2]);
+            throw new ListExpectedException(asArray[2]);
         }
 
         private LispObject EvalWhile(Environment env)
         {
             var asArray = this.ToArray();
-            if (asArray.Length < 3) throw new LispExpectedAtLeastNParametersGotMException(car, 2, asArray.Length - 1);
+            if (asArray.Length < 3) throw new ExpectedAtLeastNParametersGotMException(car, 2, asArray.Length - 1);
             while (asArray[1].Eval(env).IsTrue()) for (int i = 2; i < asArray.Length; ++i) asArray[i].Eval(env);
             return Nil.GetInstance();
         }
@@ -105,7 +105,7 @@ namespace org.lb.NLisp
         {
             var f = car.Eval(env);
             if (f is LispFunction) return ((LispFunction)f).Call(this.Skip(1).Select(o => o.Eval(env)).ToList());
-            throw new LispUndefinedFunctionException(car);
+            throw new UndefinedFunctionException(car);
         }
 
         public IEnumerator<LispObject> GetEnumerator()
