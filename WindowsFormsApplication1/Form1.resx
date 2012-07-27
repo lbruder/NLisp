@@ -121,12 +121,14 @@
     <value>(defmacro even-macro (x)
   (list '= 0 (list 'mod x 2)))
 
+; Test 123
+
 (defun primep (n)
     (if (&lt; n 4)
         (&gt; n 1)
-        (if (even-macro n)
+        (if (even-macro n) ; Another Test
             nil
-            (all
+            (every
               (lambda (i) (&lt; 0 (mod n i)))
               (range 3 n 2)))))
 

@@ -21,15 +21,11 @@ namespace org.lb.NLisp
     // - clr-new
     // - clr-call (".")
 
+    // - apply
     // - eval
-    // - port operations
-    // - read (from string, port)
-
-    // Prelude:
-    // - let over lambda (=> rewrite pop macro)
-    // - equal
-    // - and
-    // - or
+    // - port operations (strings, files, sockets)
+    // - read (from port)
+    // - thread, join, semaphore, sem-p, sem-v
 
     #region Exceptions
 
@@ -535,6 +531,11 @@ namespace org.lb.NLisp
         {
             SkipWhitespace();
             char c = Peek();
+            if (c == ';')
+            {
+                SkipToEndOfLine();
+                return Read(mode);
+            }
             if (c == '\'')
             {
                 reader.Read();
@@ -549,6 +550,11 @@ namespace org.lb.NLisp
         private void SkipWhitespace()
         {
             while (Char.IsWhiteSpace(Peek())) reader.Read();
+        }
+
+        private void SkipToEndOfLine()
+        {
+            while (Peek() != '\n') reader.Read();
         }
 
         private LispObject ReadCons(Mode mode)
@@ -773,44 +779,6 @@ namespace org.lb.NLisp
         }
     }
 
-    internal sealed class BuiltinAllFunction : BuiltinLispFunction
-    {
-        public BuiltinAllFunction() : base("all") { }
-        public override LispObject Call(List<LispObject> parameters)
-        {
-            AssertParameterCount(parameters, 2);
-            LispFunction f = (LispFunction)parameters[0];
-            var p = new List<LispObject>();
-            p.Add(LispNil.GetInstance());
-            foreach (var i in (IEnumerable<LispObject>)parameters[1])
-            {
-                p[0] = i;
-                if (f.Call(p).IsTrue()) continue;
-                return LispNil.GetInstance();
-            }
-            return LispT.GetInstance();
-        }
-    }
-
-    internal sealed class BuiltinAnyFunction : BuiltinLispFunction
-    {
-        public BuiltinAnyFunction() : base("any") { }
-        public override LispObject Call(List<LispObject> parameters)
-        {
-            AssertParameterCount(parameters, 2);
-            LispFunction f = (LispFunction)parameters[0];
-            var p = new List<LispObject>();
-            p.Add(LispNil.GetInstance());
-            foreach (var i in (IEnumerable<LispObject>)parameters[1])
-            {
-                p[0] = i;
-                if (!f.Call(p).IsTrue()) continue;
-                return LispT.GetInstance();
-            }
-            return LispNil.GetInstance();
-        }
-    }
-
     internal sealed class BuiltinRangeFunction : BuiltinLispFunction
     {
         public BuiltinRangeFunction() : base("range") { }
@@ -883,21 +851,16 @@ namespace org.lb.NLisp
             SetVariable("map", new BuiltinMapFunction());
             SetVariable("filter", new BuiltinFilterFunction());
             SetVariable("reduce", new BuiltinReduceFunction());
-            SetVariable("all", new BuiltinAllFunction());
-            SetVariable("any", new BuiltinAnyFunction());
             SetVariable("range", new BuiltinRangeFunction());
             SetVariable("gensym", new BuiltinGensymFunction());
 
             AddUnaryFunction("car", obj => obj.Car());
             AddUnaryFunction("cdr", obj => obj.Cdr());
-            AddUnaryFunction("caar", obj => obj.Car().Car());
-            AddUnaryFunction("cadr", obj => obj.Cdr().Car());
-            AddUnaryFunction("cdar", obj => obj.Car().Cdr());
-            AddUnaryFunction("cddr", obj => obj.Cdr().Cdr());
-            AddUnaryFunction("not", obj => LispObject.FromClrObject(!obj.IsTrue()));
             AddUnaryFunction("nullp", obj => LispObject.FromClrObject(obj.NullP()));
             AddUnaryFunction("consp", obj => LispObject.FromClrObject(obj is LispConsCell));
             AddUnaryFunction("symbolp", obj => LispObject.FromClrObject(obj is LispSymbol));
+            AddUnaryFunction("numberp", obj => LispObject.FromClrObject(obj is LispNumber));
+            AddUnaryFunction("stringp", obj => LispObject.FromClrObject(obj is LispString));
             AddUnaryFunction("length", LispStandardFunctions.Length);
             AddUnaryFunction("reverse", LispStandardFunctions.Reverse);
             AddUnaryFunction("print", obj => { Print(obj.ToString()); return obj; });
