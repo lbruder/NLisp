@@ -24,9 +24,9 @@ pretty quickly.
 
 A quick overview:
 
-- Special Forms: define, defun, setq, if, quote, lambda, progn
+- Special Forms: define, defun, setq, if, quote, lambda, progn, while
 - cons, car, cdr, list, reverse, map, filter, reduce, every, some, not
-- nullp, consp, symbolp, stringp, numberp, length, reverse, eq
+- nullp, consp, symbolp, stringp, numberp, length, reverse, eq, substring
 - push, pop
 - caar, cadr, cdar, cddr
 - lexical scoping
