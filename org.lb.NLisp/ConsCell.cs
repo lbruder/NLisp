@@ -22,7 +22,14 @@ namespace org.lb.NLisp
         public static ConsCell Cons(LispObject car, LispObject cdr) { return new ConsCell(car, cdr); }
         internal override LispObject Car() { return car; }
         internal override LispObject Cdr() { return cdr; }
-        internal override LispObject Add(LispObject other) { var list = this.ToList(); list.AddRange(OtherConsCell(other, "+")); return FromClrObject(list); }
+
+        internal override LispObject Add(LispObject other)
+        {
+            var list = this.ToList();
+            if (!(other is Nil)) list.AddRange(OtherConsCell(other, "+"));
+            return FromClrObject(list);
+        }
+
         private ConsCell OtherConsCell(LispObject other, string op)
         {
             ConsCell n = other as ConsCell;

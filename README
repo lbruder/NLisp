@@ -25,7 +25,7 @@ pretty quickly.
 A quick overview:
 
 - Special Forms: define, defun, setq, if, quote, lambda, progn, while
-- cons, car, cdr, list, reverse, map, filter, reduce, every, some, not
+- cons, car, cdr, list, reverse, map, filter, reduce, every, some, not, let
 - nullp, consp, symbolp, stringp, numberp, length, reverse, eq, substring
 - push, pop
 - caar, cadr, cdar, cddr
@@ -44,7 +44,6 @@ A quick overview:
 
 
 Plans:
-- augment defun and defmacro with &rest parameters
 - Quasiquoting
 - string operations
 - eval
@@ -60,4 +59,3 @@ CLR FFI:
 - clr-new
 - clr-call (or ".")
 - Interpreter method AddFunction to use e.g. C# lambdas as Lisp functions
-

@@ -1,4 +1,4 @@
-; TODO: let, and, or, equalp, assoc, string manipulation functions, cond macro
+; TODO: and, or, equalp, assoc, string manipulation functions, cond macro
 
 (defun list (&rest args) args)
 (defun not (x) (if x nil t))
@@ -8,7 +8,14 @@
 (defun cadr (x) (car (cdr x)))
 (defun cdar (x) (cdr (car x)))
 (defun cddr (x) (cdr (cdr x)))
+(defun caaar (x) (car (car (car x))))
+(defun caadr (x) (car (car (cdr x))))
+(defun cadar (x) (car (cdr (car x))))
 (defun caddr (x) (car (cdr (cdr x))))
+(defun cdaar (x) (cdr (car (car x))))
+(defun cdadr (x) (cdr (car (cdr x))))
+(defun cddar (x) (cdr (cdr (car x))))
+(defun cdddr (x) (cdr (cdr (cdr x))))
 (defun abs (x) (if (< x 0) (- 0 x) x))
 (defun evenp (x) (= 0 (mod x 2)))
 (defun oddp (x) (not (evenp x)))
@@ -32,8 +39,7 @@
 (defun map (f lst)
   (define ret nil)
   (while lst
-    (push (f (car lst)) ret)
-    (setq lst (cdr lst)))
+    (push (f (pop lst)) ret))
   (nreverse ret))
 
 (defun filter (f lst)
@@ -46,14 +52,17 @@
   (nreverse ret))
 
 (defun reduce (f lst)
-  (define acc (car lst))
-  (setq lst (cdr lst))
+  (define acc (pop lst))
   (if lst
       (while lst
-        (setq acc (f acc (car lst)))
-        (setq lst (cdr lst)))
+        (setq acc (f acc (pop lst))))
       (setq acc nil))
   acc)
+
+(defmacro let (variable-list &rest body)
+  (push (map car variable-list) body)
+  (push 'lambda body)
+  (+ (list body) (map cadr variable-list)))
 
 (defun every (f lst)
   (if lst
