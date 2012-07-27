@@ -44,16 +44,16 @@ namespace org.lb.NLisp
             AddUnaryFunction("car", obj => obj.Car());
             AddUnaryFunction("cdr", obj => obj.Cdr());
             AddUnaryFunction("nullp", obj => LispObject.FromClrObject(obj.NullP()));
-            AddUnaryFunction("consp", obj => LispObject.FromClrObject(obj is LispConsCell));
-            AddUnaryFunction("symbolp", obj => LispObject.FromClrObject(obj is LispSymbol));
-            AddUnaryFunction("numberp", obj => LispObject.FromClrObject(obj is LispNumber));
+            AddUnaryFunction("consp", obj => LispObject.FromClrObject(obj is ConsCell));
+            AddUnaryFunction("symbolp", obj => LispObject.FromClrObject(obj is Symbol));
+            AddUnaryFunction("numberp", obj => LispObject.FromClrObject(obj is Number));
             AddUnaryFunction("stringp", obj => LispObject.FromClrObject(obj is LispString));
             AddUnaryFunction("length", LispStandardFunctions.Length);
             AddUnaryFunction("reverse", LispStandardFunctions.Reverse);
             AddUnaryFunction("print", obj => { Print(obj.ToString()); return obj; });
 
-            AddBinaryFunction("eq", (o1, o2) => LispObject.FromClrObject((o1 == o2) || (o1 is LispNumber && o1.Equals(o2))));
-            AddBinaryFunction("cons", LispConsCell.Cons);
+            AddBinaryFunction("eq", (o1, o2) => LispObject.FromClrObject((o1 == o2) || (o1 is Number && o1.Equals(o2))));
+            AddBinaryFunction("cons", ConsCell.Cons);
             AddBinaryFunction("+", (o1, o2) => o1.Add(o2));
             AddBinaryFunction("-", (o1, o2) => o1.Sub(o2));
             AddBinaryFunction("*", (o1, o2) => o1.Mul(o2));
@@ -68,7 +68,7 @@ namespace org.lb.NLisp
 
         public LispObject Evaluate(string script)
         {
-            LispObject ret = LispNil.GetInstance();
+            LispObject ret = Nil.GetInstance();
             var stream = new StringReader(script);
             SkipWhitespaceInStream(stream);
             while (stream.Peek() != -1)
@@ -79,7 +79,7 @@ namespace org.lb.NLisp
             return ret;
         }
 
-        public void SetVariable(string identifier, object value) { global.Define(LispSymbol.fromString(identifier), LispObject.FromClrObject(value)); }
+        public void SetVariable(string identifier, object value) { global.Define(Symbol.fromString(identifier), LispObject.FromClrObject(value)); }
         public void AddFunction(string identifier, Delegate f) { SetVariable(identifier, f); }
 
         internal LispObject Eval(List<LispObject> ast) { return LispObject.FromClrObject(ast).Eval(global); }

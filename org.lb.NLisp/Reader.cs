@@ -8,9 +8,9 @@ namespace org.lb.NLisp
 {
     internal sealed class Reader
     {
-        private static readonly LispSymbol defmacroSymbol = LispSymbol.fromString("defmacro");
-        private static readonly LispSymbol quoteSymbol = LispSymbol.fromString("quote");
-        private readonly HashSet<LispSymbol> macros = new HashSet<LispSymbol>();
+        private static readonly Symbol defmacroSymbol = Symbol.fromString("defmacro");
+        private static readonly Symbol quoteSymbol = Symbol.fromString("quote");
+        private readonly HashSet<Symbol> macros = new HashSet<Symbol>();
         private readonly NLisp lisp;
         private TextReader reader;
 
@@ -51,7 +51,7 @@ namespace org.lb.NLisp
             if (c == '\'')
             {
                 reader.Read();
-                return LispConsCell.Cons(quoteSymbol, LispConsCell.Cons(Read(Mode.quoting), LispNil.GetInstance()));
+                return ConsCell.Cons(quoteSymbol, ConsCell.Cons(Read(Mode.quoting), Nil.GetInstance()));
             }
             if (c == '(') return ReadCons(mode);
             if (c == '"') return ReadString();
@@ -85,21 +85,21 @@ namespace org.lb.NLisp
 
         private LispObject EvalMacros(Mode mode, List<LispObject> list)
         {
-            if (mode == Mode.normal && list.Count > 0 && list[0] is LispSymbol)
+            if (mode == Mode.normal && list.Count > 0 && list[0] is Symbol)
             {
-                LispSymbol symbol = (LispSymbol)list[0];
+                Symbol symbol = (Symbol)list[0];
                 if (defmacroSymbol.Equals(symbol))
                 {
-                    list[0] = LispSymbol.fromString("defun");
-                    macros.Add((LispSymbol)list[1]);
+                    list[0] = Symbol.fromString("defun");
+                    macros.Add((Symbol)list[1]);
                     lisp.Eval(list);
-                    return LispT.GetInstance();
+                    return T.GetInstance();
                 }
                 if (macros.Contains(symbol))
                 {
                     // Quote all parameters to prevent premature evaluation
                     for (int i = 1; i < list.Count; ++i)
-                        list[i] = LispConsCell.Cons(quoteSymbol, LispConsCell.Cons(list[i], LispNil.GetInstance()));
+                        list[i] = ConsCell.Cons(quoteSymbol, ConsCell.Cons(list[i], Nil.GetInstance()));
                     return lisp.Eval(list);
                 }
             }
@@ -130,14 +130,14 @@ namespace org.lb.NLisp
         {
             var value = new StringBuilder();
             while (reader.Peek() != -1 && (Char.IsNumber(Peek()) || Peek() == '.')) value.Append((char)reader.Read());
-            return new LispNumber(double.Parse(value.ToString(), CultureInfo.InvariantCulture));
+            return new Number(double.Parse(value.ToString(), CultureInfo.InvariantCulture));
         }
 
         private LispObject ReadSymbol()
         {
             var value = new StringBuilder();
             while (reader.Peek() != -1 && (Peek() != ')' && !Char.IsWhiteSpace(Peek()))) value.Append((char)reader.Read());
-            return LispSymbol.fromString(value.ToString());
+            return Symbol.fromString(value.ToString());
         }
     }
 }

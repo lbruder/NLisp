@@ -4,7 +4,7 @@ namespace org.lb.NLisp
 {
     public sealed class LispConstantCanNotBeChangedException : Exception
     {
-        internal LispConstantCanNotBeChangedException(LispSymbol sym)
+        internal LispConstantCanNotBeChangedException(Symbol sym)
             : base(sym + " is a constant and can not be changed") // TODO: I18N
         {
         }
@@ -64,7 +64,7 @@ namespace org.lb.NLisp
 
     public sealed class LispSymbolNotFoundException : Exception
     {
-        internal LispSymbolNotFoundException(LispSymbol symbol)
+        internal LispSymbolNotFoundException(Symbol symbol)
             : base("Undefined symbol " + symbol) // TODO: I18N
         {
         }

@@ -1,6 +1,7 @@
 ; TODO:
 ; let over lambda (=> rewrite pop macro)
 ; equalp, and, or, assoc, ...
+; setf macro!
 
 (defun not (x) (if x nil t))
 (defun <= (a b) (not (> a b)))

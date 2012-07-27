@@ -5,7 +5,7 @@ using org.lb.NLisp;
 
 namespace WindowsFormsApplication1
 {
-    public partial class Form1 : Form
+    public sealed partial class Form1 : Form
     {
         private readonly NLisp lisp;
 

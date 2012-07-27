@@ -4,30 +4,30 @@ namespace org.lb.NLisp
 {
     public sealed class Environment
     {
-        private static readonly LispSymbol tSym = LispSymbol.fromString("t");
-        private static readonly LispSymbol nilSym = LispSymbol.fromString("nil");
+        private static readonly Symbol tSym = Symbol.fromString("t");
+        private static readonly Symbol nilSym = Symbol.fromString("nil");
         private readonly Environment outer;
-        private readonly Dictionary<LispSymbol, LispObject> values = new Dictionary<LispSymbol, LispObject>();
+        private readonly Dictionary<Symbol, LispObject> values = new Dictionary<Symbol, LispObject>();
         public Environment()
         {
-            values[LispSymbol.fromString("nil")] = LispNil.GetInstance();
-            values[LispSymbol.fromString("t")] = LispT.GetInstance();
+            values[Symbol.fromString("nil")] = Nil.GetInstance();
+            values[Symbol.fromString("t")] = T.GetInstance();
         }
         public Environment(Environment outer)
         {
-            values[LispSymbol.fromString("nil")] = LispNil.GetInstance();
-            values[LispSymbol.fromString("t")] = LispT.GetInstance();
+            values[Symbol.fromString("nil")] = Nil.GetInstance();
+            values[Symbol.fromString("t")] = T.GetInstance();
             this.outer = outer;
         }
 
-        public LispObject Define(LispSymbol symbol, LispObject value)
+        public LispObject Define(Symbol symbol, LispObject value)
         {
             if (tSym.Equals(symbol) || nilSym.Equals(symbol)) throw new LispConstantCanNotBeChangedException(symbol);
             values[symbol] = value;
             return value;
         }
 
-        public LispObject Set(LispSymbol symbol, LispObject value)
+        public LispObject Set(Symbol symbol, LispObject value)
         {
             if (values.ContainsKey(symbol)) values[symbol] = value;
             else if (outer == null) throw new LispSymbolNotFoundException(symbol);
@@ -35,7 +35,7 @@ namespace org.lb.NLisp
             return value;
         }
 
-        public LispObject Get(LispSymbol symbol)
+        public LispObject Get(Symbol symbol)
         {
             LispObject ret;
             if (values.TryGetValue(symbol, out ret)) return ret;

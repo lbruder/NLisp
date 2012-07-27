@@ -37,11 +37,16 @@
   <ItemGroup>
     <Compile Include="Environment.cs" />
     <Compile Include="Exceptions.cs" />
-    <Compile Include="LispObjects.cs" />
+    <Compile Include="ConsCell.cs" />
+    <Compile Include="LispFunctions.cs" />
+    <Compile Include="LispObject.cs" />
+    <Compile Include="LispString.cs" />
     <Compile Include="NLisp.cs" />
+    <Compile Include="Number.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reader.cs" />
     <Compile Include="StandardFunctions.cs" />
+    <Compile Include="Symbol.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Init.lsp">

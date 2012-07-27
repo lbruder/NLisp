@@ -23,13 +23,13 @@ namespace org.lb.NLisp
                 return LispObject.FromClrObject(sb.ToString());
             }
 
-            LispObject ret = LispNil.GetInstance();
+            LispObject ret = Nil.GetInstance();
             while (!list.NullP())
             {
-                ret = LispConsCell.Cons(list.Car(), ret);
+                ret = ConsCell.Cons(list.Car(), ret);
                 list = list.Cdr();
-                if (list is LispNil) break;
-                if (!(list is LispConsCell)) return LispConsCell.Cons(list, ret);
+                if (list is Nil) break;
+                if (!(list is ConsCell)) return ConsCell.Cons(list, ret);
             }
             return ret;
         }
@@ -41,7 +41,7 @@ namespace org.lb.NLisp
         public override LispObject Call(List<LispObject> parameters)
         {
             AssertParameterCount(parameters, 0);
-            return LispSymbol.Gensym();
+            return Symbol.Gensym();
         }
     }
 
@@ -60,7 +60,7 @@ namespace org.lb.NLisp
             var ret = new List<LispObject>();
             LispFunction f = (LispFunction)parameters[0];
             var p = new List<LispObject>();
-            p.Add(LispNil.GetInstance());
+            p.Add(Nil.GetInstance());
             foreach (var i in (IEnumerable<LispObject>)parameters[1])
             {
                 p[0] = i;
@@ -79,7 +79,7 @@ namespace org.lb.NLisp
             var ret = new List<LispObject>();
             LispFunction f = (LispFunction)parameters[0];
             var p = new List<LispObject>();
-            p.Add(LispNil.GetInstance());
+            p.Add(Nil.GetInstance());
             foreach (var i in (IEnumerable<LispObject>)parameters[1])
             {
                 p[0] = i;
@@ -97,8 +97,8 @@ namespace org.lb.NLisp
             AssertParameterCount(parameters, 2);
             LispFunction f = (LispFunction)parameters[0];
             var p = new List<LispObject>();
-            p.Add(LispNil.GetInstance());
-            p.Add(LispNil.GetInstance());
+            p.Add(Nil.GetInstance());
+            p.Add(Nil.GetInstance());
             var values = (IEnumerable<LispObject>)parameters[1];
             var acc = values.First();
             foreach (var i in values.Skip(1))
@@ -123,21 +123,21 @@ namespace org.lb.NLisp
             switch (parameters.Count)
             {
                 case 1:
-                    to = ((LispNumber)parameters[0]).NumberAsInt;
+                    to = ((Number)parameters[0]).NumberAsInt;
                     break;
                 case 2:
-                    from = ((LispNumber)parameters[0]).NumberAsInt;
-                    to = ((LispNumber)parameters[1]).NumberAsInt;
+                    from = ((Number)parameters[0]).NumberAsInt;
+                    to = ((Number)parameters[1]).NumberAsInt;
                     break;
                 default:
-                    from = ((LispNumber)parameters[0]).NumberAsInt;
-                    to = ((LispNumber)parameters[1]).NumberAsInt;
-                    step = ((LispNumber)parameters[2]).NumberAsInt;
+                    from = ((Number)parameters[0]).NumberAsInt;
+                    to = ((Number)parameters[1]).NumberAsInt;
+                    step = ((Number)parameters[2]).NumberAsInt;
                     break;
             }
 
             var ret = new List<LispObject>();
-            for (int i = from; i < to; i += step) ret.Add(new LispNumber(i));
+            for (int i = from; i < to; i += step) ret.Add(new Number(i));
             return FromClrObject(ret);
         }
     }
