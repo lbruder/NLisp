@@ -5,7 +5,6 @@ using System.IO;
 namespace org.lb.NLisp
 {
     // TODO:
-    // - substring
     // - augment lambda with &rest parameters
     // - quasiquoting
     // - clr FFI
@@ -26,9 +25,6 @@ namespace org.lb.NLisp
             reader = new Reader(this);
 
             SetVariable("list", new BuiltinListFunction());
-            SetVariable("map", new BuiltinMapFunction());
-            SetVariable("filter", new BuiltinFilterFunction());
-            SetVariable("reduce", new BuiltinReduceFunction());
             SetVariable("range", new BuiltinRangeFunction());
             SetVariable("gensym", new BuiltinGensymFunction());
             SetVariable("substring", new BuiltinSubstringFunction());
@@ -42,6 +38,7 @@ namespace org.lb.NLisp
             AddUnaryFunction("stringp", obj => LispObject.FromClrObject(obj is LispString));
             AddUnaryFunction("length", LispStandardFunctions.Length);
             AddUnaryFunction("reverse", LispStandardFunctions.Reverse);
+            AddUnaryFunction("nreverse", LispStandardFunctions.Reverse); // For now
             AddUnaryFunction("print", obj => { Print(obj.ToString()); return obj; });
 
             AddBinaryFunction("eq", (o1, o2) => LispObject.FromClrObject((o1 == o2) || (o1 is Number && o1.Equals(o2))));

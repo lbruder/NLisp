@@ -51,66 +51,6 @@ namespace org.lb.NLisp
         public override LispObject Call(List<LispObject> parameters) { return FromClrObject(parameters); }
     }
 
-    internal sealed class BuiltinMapFunction : BuiltinLispFunction // TODO: Strings
-    {
-        public BuiltinMapFunction() : base("map") { }
-        public override LispObject Call(List<LispObject> parameters)
-        {
-            AssertParameterCount(parameters, 2);
-            var ret = new List<LispObject>();
-            LispFunction f = (LispFunction)parameters[0];
-            var p = new List<LispObject>();
-            p.Add(Nil.GetInstance());
-            foreach (var i in (IEnumerable<LispObject>)parameters[1])
-            {
-                p[0] = i;
-                ret.Add(f.Call(p));
-            }
-            return FromClrObject(ret);
-        }
-    }
-
-    internal sealed class BuiltinFilterFunction : BuiltinLispFunction // TODO: Strings
-    {
-        public BuiltinFilterFunction() : base("filter") { }
-        public override LispObject Call(List<LispObject> parameters)
-        {
-            AssertParameterCount(parameters, 2);
-            var ret = new List<LispObject>();
-            LispFunction f = (LispFunction)parameters[0];
-            var p = new List<LispObject>();
-            p.Add(Nil.GetInstance());
-            foreach (var i in (IEnumerable<LispObject>)parameters[1])
-            {
-                p[0] = i;
-                if (f.Call(p).IsTrue()) ret.Add(i);
-            }
-            return FromClrObject(ret);
-        }
-    }
-
-    internal sealed class BuiltinReduceFunction : BuiltinLispFunction
-    {
-        public BuiltinReduceFunction() : base("reduce") { }
-        public override LispObject Call(List<LispObject> parameters)
-        {
-            AssertParameterCount(parameters, 2);
-            LispFunction f = (LispFunction)parameters[0];
-            var p = new List<LispObject>();
-            p.Add(Nil.GetInstance());
-            p.Add(Nil.GetInstance());
-            var values = (IEnumerable<LispObject>)parameters[1];
-            var acc = values.First();
-            foreach (var i in values.Skip(1))
-            {
-                p[0] = acc;
-                p[1] = i;
-                acc = f.Call(p);
-            }
-            return FromClrObject(acc);
-        }
-    }
-
     internal sealed class BuiltinRangeFunction : BuiltinLispFunction
     {
         public BuiltinRangeFunction() : base("range") { }
@@ -152,7 +92,7 @@ namespace org.lb.NLisp
             int from = ((Number)parameters[1]).NumberAsInt;
             return FromClrObject(parameters.Count == 2
                 ? str.Substring(from)
-                : str.Substring(from, ((Number)parameters[2]).NumberAsInt-from));
+                : str.Substring(from, ((Number)parameters[2]).NumberAsInt - from));
         }
     }
 
