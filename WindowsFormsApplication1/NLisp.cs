@@ -11,6 +11,7 @@ namespace org.lb.NLisp
     // TODO:
     // - augment lambda with &rest parameters
     // - quasiquoting
+    // - comments
     // - some basic(!) kind of while... loop. Or tagbody? Or TCO (prob Environments)?
 
     // - clr-methods
@@ -24,13 +25,9 @@ namespace org.lb.NLisp
     // - port operations
     // - read (from string, port)
 
-    // Prelude: Lisp script to read and execute on startup -> flesh out the language in Lisp, keep the C# code under 1000 lines
-    // - let over lambda
+    // Prelude:
+    // - let over lambda (=> rewrite pop macro)
     // - equal
-    // - append
-    // - push
-    // - <=
-    // - >=
     // - and
     // - or
 
@@ -163,8 +160,6 @@ namespace org.lb.NLisp
         public virtual LispObject NumEq(LispObject other) { throw new LispInvalidOperationException(this, other, "="); }
         public virtual LispObject Gt(LispObject other) { throw new LispInvalidOperationException(this, other, ">"); }
         public virtual LispObject Lt(LispObject other) { throw new LispInvalidOperationException(this, other, "<"); }
-        public virtual LispObject Ge(LispObject other) { throw new LispInvalidOperationException(this, other, ">="); }
-        public virtual LispObject Le(LispObject other) { throw new LispInvalidOperationException(this, other, "<="); }
 
         public static LispObject FromClrObject(object source)
         {
@@ -237,8 +232,6 @@ namespace org.lb.NLisp
         public override LispObject NumEq(LispObject other) { return FromClrObject(number == OtherNumber(other, "=")); }
         public override LispObject Lt(LispObject other) { return FromClrObject(number < OtherNumber(other, "<")); }
         public override LispObject Gt(LispObject other) { return FromClrObject(number > OtherNumber(other, ">")); }
-        public override LispObject Le(LispObject other) { return FromClrObject(number <= OtherNumber(other, "<=")); }
-        public override LispObject Ge(LispObject other) { return FromClrObject(number >= OtherNumber(other, ">=")); }
         private double OtherNumber(LispObject other, string op)
         {
             LispNumber n = other as LispNumber;
@@ -259,8 +252,6 @@ namespace org.lb.NLisp
         public override LispObject NumEq(LispObject other) { return FromClrObject(String.CompareOrdinal(value, OtherString(other, "=")) == 0); }
         public override LispObject Lt(LispObject other) { return FromClrObject(String.CompareOrdinal(value, OtherString(other, "<")) < 0); }
         public override LispObject Gt(LispObject other) { return FromClrObject(String.CompareOrdinal(value, OtherString(other, ">")) > 0); }
-        public override LispObject Le(LispObject other) { return FromClrObject(String.CompareOrdinal(value, OtherString(other, "<=")) <= 0); }
-        public override LispObject Ge(LispObject other) { return FromClrObject(String.CompareOrdinal(value, OtherString(other, ">=")) >= 0); }
         private string OtherString(LispObject other, string op)
         {
             LispString n = other as LispString;
@@ -921,8 +912,8 @@ namespace org.lb.NLisp
             AddBinaryFunction("=", (o1, o2) => o1.NumEq(o2));
             AddBinaryFunction("<", (o1, o2) => o1.Lt(o2));
             AddBinaryFunction(">", (o1, o2) => o1.Gt(o2));
-            AddBinaryFunction("<=", (o1, o2) => o1.Le(o2));
-            AddBinaryFunction(">=", (o1, o2) => o1.Ge(o2));
+
+            if (File.Exists("Init.lsp")) Evaluate(File.ReadAllText("Init.lsp"));
         }
 
         public LispObject Evaluate(string script)
