@@ -18,13 +18,13 @@ Simple Lisp interpreter for C# 3.5
 This is a pet Lisp interpreter for .NET 3.5 written in C#. Currently supports
 only the minimum operations to get a program running:
 
-- Special Forms: define, defun, setf, if, quote, lambda, progn
+- Special Forms: define, defun, setq, if, quote, lambda, progn
 - cons, car, cdr, list, reverse, map, filter, reduce, all, any, not
 - nullp, consp, symbolp, length, reverse, eq
 - lexical scoping
 - minimal arithmetic (all numbers are double FOR NOW):
-  +, -, *, /, rem (remainder), =, >, <, <=, >=
-- recursion (no deep levels, no TCO!)
+  +, -, *, /, mod, =, >, <, <=, >=
+- recursion (no deep levels, no TCO yet!)
 - (range ?start-value below-value ?step)
   (range 5) => (0 1 2 3 4)
   (range 2 5) => (2 3 4)

@@ -11,7 +11,7 @@ namespace org.lb.NLisp
     // TODO:
     // - augment lambda with &rest parameters
     // - quasiquoting
-    // - some basic(!) kind of while... loop
+    // - some basic(!) kind of while... loop. Or tagbody? Or TCO (prob Environments)?
 
     // - clr-methods
     // - clr-properties
@@ -19,6 +19,7 @@ namespace org.lb.NLisp
     // - clr-set
     // - clr-new
     // - clr-call (".")
+
     // - eval
     // - port operations
     // - read (from string, port)
@@ -28,6 +29,10 @@ namespace org.lb.NLisp
     // - equal
     // - append
     // - push
+    // - <=
+    // - >=
+    // - and
+    // - or
 
     #region Exceptions
 
@@ -154,7 +159,7 @@ namespace org.lb.NLisp
         public virtual LispObject Sub(LispObject other) { throw new LispInvalidOperationException(this, other, "-"); }
         public virtual LispObject Mul(LispObject other) { throw new LispInvalidOperationException(this, other, "*"); }
         public virtual LispObject Div(LispObject other) { throw new LispInvalidOperationException(this, other, "/"); }
-        public virtual LispObject Rem(LispObject other) { throw new LispInvalidOperationException(this, other, "rem"); }
+        public virtual LispObject Mod(LispObject other) { throw new LispInvalidOperationException(this, other, "mod"); }
         public virtual LispObject NumEq(LispObject other) { throw new LispInvalidOperationException(this, other, "="); }
         public virtual LispObject Gt(LispObject other) { throw new LispInvalidOperationException(this, other, ">"); }
         public virtual LispObject Lt(LispObject other) { throw new LispInvalidOperationException(this, other, "<"); }
@@ -228,7 +233,7 @@ namespace org.lb.NLisp
         public override LispObject Sub(LispObject other) { return new LispNumber(number - OtherNumber(other, "-")); }
         public override LispObject Mul(LispObject other) { return new LispNumber(number * OtherNumber(other, "*")); }
         public override LispObject Div(LispObject other) { if (OtherNumber(other, "/") == 0) throw new LispDivisionByZeroException(); return new LispNumber(number / OtherNumber(other, "/")); }
-        public override LispObject Rem(LispObject other) { if (OtherNumber(other, "rem") == 0) throw new LispDivisionByZeroException(); return new LispNumber(number % OtherNumber(other, "rem")); }
+        public override LispObject Mod(LispObject other) { if (OtherNumber(other, "mod") == 0) throw new LispDivisionByZeroException(); return new LispNumber(number % OtherNumber(other, "mod")); }
         public override LispObject NumEq(LispObject other) { return FromClrObject(number == OtherNumber(other, "=")); }
         public override LispObject Lt(LispObject other) { return FromClrObject(number < OtherNumber(other, "<")); }
         public override LispObject Gt(LispObject other) { return FromClrObject(number > OtherNumber(other, ">")); }
@@ -297,7 +302,7 @@ namespace org.lb.NLisp
         private static readonly LispSymbol prognSym = LispSymbol.fromString("progn");
         private static readonly LispSymbol defineSym = LispSymbol.fromString("define");
         private static readonly LispSymbol defunSym = LispSymbol.fromString("defun");
-        private static readonly LispSymbol setSym = LispSymbol.fromString("setf");
+        private static readonly LispSymbol setSym = LispSymbol.fromString("setq");
         private static readonly LispSymbol lambdaSym = LispSymbol.fromString("lambda");
 
         private readonly LispObject car;
@@ -912,7 +917,7 @@ namespace org.lb.NLisp
             AddBinaryFunction("-", (o1, o2) => o1.Sub(o2));
             AddBinaryFunction("*", (o1, o2) => o1.Mul(o2));
             AddBinaryFunction("/", (o1, o2) => o1.Div(o2));
-            AddBinaryFunction("rem", (o1, o2) => o1.Rem(o2));
+            AddBinaryFunction("mod", (o1, o2) => o1.Mod(o2));
             AddBinaryFunction("=", (o1, o2) => o1.NumEq(o2));
             AddBinaryFunction("<", (o1, o2) => o1.Lt(o2));
             AddBinaryFunction(">", (o1, o2) => o1.Gt(o2));
