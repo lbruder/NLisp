@@ -6,18 +6,18 @@ namespace org.lb.NLisp
     public abstract class LispObject
     {
         public virtual bool IsTrue() { return true; }
-        public virtual bool NullP() { return false; }
-        public virtual LispObject Eval(Environment env) { return Nil.GetInstance(); }
-        public virtual LispObject Car() { throw new LispObjectIsNotAListException(this); }
-        public virtual LispObject Cdr() { throw new LispObjectIsNotAListException(this); }
-        public virtual LispObject Add(LispObject other) { throw new LispInvalidOperationException(this, other, "+"); }
-        public virtual LispObject Sub(LispObject other) { throw new LispInvalidOperationException(this, other, "-"); }
-        public virtual LispObject Mul(LispObject other) { throw new LispInvalidOperationException(this, other, "*"); }
-        public virtual LispObject Div(LispObject other) { throw new LispInvalidOperationException(this, other, "/"); }
-        public virtual LispObject Mod(LispObject other) { throw new LispInvalidOperationException(this, other, "mod"); }
-        public virtual LispObject NumEq(LispObject other) { throw new LispInvalidOperationException(this, other, "="); }
-        public virtual LispObject Gt(LispObject other) { throw new LispInvalidOperationException(this, other, ">"); }
-        public virtual LispObject Lt(LispObject other) { throw new LispInvalidOperationException(this, other, "<"); }
+        internal virtual bool NullP() { return false; }
+        internal virtual LispObject Eval(Environment env) { return Nil.GetInstance(); }
+        internal virtual LispObject Car() { throw new LispObjectIsNotAListException(this); }
+        internal virtual LispObject Cdr() { throw new LispObjectIsNotAListException(this); }
+        internal virtual LispObject Add(LispObject other) { throw new LispInvalidOperationException(this, other, "+"); }
+        internal virtual LispObject Sub(LispObject other) { throw new LispInvalidOperationException(this, other, "-"); }
+        internal virtual LispObject Mul(LispObject other) { throw new LispInvalidOperationException(this, other, "*"); }
+        internal virtual LispObject Div(LispObject other) { throw new LispInvalidOperationException(this, other, "/"); }
+        internal virtual LispObject Mod(LispObject other) { throw new LispInvalidOperationException(this, other, "mod"); }
+        internal virtual LispObject NumEq(LispObject other) { throw new LispInvalidOperationException(this, other, "="); }
+        internal virtual LispObject Gt(LispObject other) { throw new LispInvalidOperationException(this, other, ">"); }
+        internal virtual LispObject Lt(LispObject other) { throw new LispInvalidOperationException(this, other, "<"); }
 
         public static LispObject FromClrObject(object source)
         {
@@ -52,11 +52,11 @@ namespace org.lb.NLisp
         private static readonly Nil instance = new Nil();
         private Nil() { }
         public static Nil GetInstance() { return instance; }
-        public override LispObject Car() { return this; }
-        public override LispObject Cdr() { return this; }
-        public override bool NullP() { return true; }
+        internal override LispObject Car() { return this; }
+        internal override LispObject Cdr() { return this; }
+        internal override bool NullP() { return true; }
         public override bool IsTrue() { return false; }
-        public override LispObject Eval(Environment env) { throw new LispCannotEvaluateEmptyListException(); }
+        internal override LispObject Eval(Environment env) { throw new LispCannotEvaluateEmptyListException(); }
         public override string ToString() { return "NIL"; }
         public override bool Equals(object obj) { return obj is Nil; }
         public override int GetHashCode() { return 4711; }
@@ -67,7 +67,7 @@ namespace org.lb.NLisp
         private static readonly T instance = new T();
         private T() { }
         public static T GetInstance() { return instance; }
-        public override LispObject Eval(Environment env) { return this; }
+        internal override LispObject Eval(Environment env) { return this; }
         public override string ToString() { return "T"; }
         public override bool Equals(object obj) { return obj is T; }
         public override int GetHashCode() { return 0815; }

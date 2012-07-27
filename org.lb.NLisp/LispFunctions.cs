@@ -6,7 +6,7 @@ namespace org.lb.NLisp
 {
     internal abstract class LispFunction : LispObject
     {
-        public override LispObject Eval(Environment env) { return this; }
+        internal override LispObject Eval(Environment env) { return this; }
         public abstract LispObject Call(List<LispObject> parameters);
     }
 

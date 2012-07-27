@@ -2,6 +2,8 @@
 
 namespace org.lb.NLisp
 {
+    // TODO: New base classes LispException, LispRuntimeError, LispCliError
+
     public sealed class LispConstantCanNotBeChangedException : Exception
     {
         internal LispConstantCanNotBeChangedException(Symbol sym)

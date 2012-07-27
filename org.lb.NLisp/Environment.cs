@@ -2,7 +2,7 @@
 
 namespace org.lb.NLisp
 {
-    public sealed class Environment
+    internal sealed class Environment
     {
         private static readonly Symbol tSym = Symbol.fromString("t");
         private static readonly Symbol nilSym = Symbol.fromString("nil");

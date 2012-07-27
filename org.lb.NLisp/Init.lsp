@@ -10,6 +10,9 @@
 (defun cadr (x) (car (cdr x)))
 (defun cdar (x) (cdr (car x)))
 (defun cddr (x) (cdr (cdr x)))
+(defun abs (x) (if (< x 0) (- 0 x) x))
+(defun evenp (x) (= 0 (mod x 2)))
+(defun oddp (x) (not (evenp x)))
 
 (defun every (f lst)
   (if lst

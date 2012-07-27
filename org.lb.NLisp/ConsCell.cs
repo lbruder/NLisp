@@ -19,9 +19,9 @@ namespace org.lb.NLisp
         private readonly LispObject cdr;
         private ConsCell(LispObject car, LispObject cdr) { this.car = car; this.cdr = cdr; }
         public static ConsCell Cons(LispObject car, LispObject cdr) { return new ConsCell(car, cdr); }
-        public override LispObject Car() { return car; }
-        public override LispObject Cdr() { return cdr; }
-        public override LispObject Add(LispObject other) { var list = this.ToList(); list.AddRange(OtherConsCell(other, "+")); return FromClrObject(list); }
+        internal override LispObject Car() { return car; }
+        internal override LispObject Cdr() { return cdr; }
+        internal override LispObject Add(LispObject other) { var list = this.ToList(); list.AddRange(OtherConsCell(other, "+")); return FromClrObject(list); }
         private ConsCell OtherConsCell(LispObject other, string op)
         {
             ConsCell n = other as ConsCell;
@@ -29,7 +29,7 @@ namespace org.lb.NLisp
             return n;
         }
 
-        public override LispObject Eval(Environment env)
+        internal override LispObject Eval(Environment env)
         {
             if (quoteSym.Equals(car)) return ((ConsCell)cdr).car;
             if (ifSym.Equals(car)) return EvalIf(env);

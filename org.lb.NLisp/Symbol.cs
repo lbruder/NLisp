@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace org.lb.NLisp
 {
-    public sealed class Symbol : LispObject
+    internal sealed class Symbol : LispObject
     {
         private readonly string value;
         private Symbol(string value) { this.value = value; }
@@ -19,7 +19,7 @@ namespace org.lb.NLisp
         }
 
         public override bool IsTrue() { return value != "nil"; }
-        public override LispObject Eval(Environment env) { return env.Get(this); }
+        internal override LispObject Eval(Environment env) { return env.Get(this); }
         public override string ToString() { return value; }
         public override bool Equals(object obj) { return obj == this; }
         public override int GetHashCode() { return value.GetHashCode(); }
