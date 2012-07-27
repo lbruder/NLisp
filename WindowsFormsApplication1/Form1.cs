@@ -7,12 +7,12 @@ namespace WindowsFormsApplication1
 {
     public partial class Form1 : Form
     {
-        private readonly Lisp lisp;
+        private readonly NLisp lisp;
 
         public Form1()
         {
             InitializeComponent();
-            lisp = new Lisp();
+            lisp = new NLisp();
             lisp.Print += Print;
         }
 

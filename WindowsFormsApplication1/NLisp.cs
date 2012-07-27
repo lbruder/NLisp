@@ -499,7 +499,7 @@ namespace org.lb.NLisp
         private static readonly LispSymbol defmacroSymbol = LispSymbol.fromString("defmacro");
         private static readonly LispSymbol quoteSymbol = LispSymbol.fromString("quote");
         private readonly HashSet<LispSymbol> macros = new HashSet<LispSymbol>();
-        private readonly Lisp lisp;
+        private readonly NLisp lisp;
         private TextReader reader;
 
         private enum Mode
@@ -509,7 +509,7 @@ namespace org.lb.NLisp
             //TODO: quasiquoting
         }
 
-        public Reader(Lisp lisp)
+        public Reader(NLisp lisp)
         {
             this.lisp = lisp;
         }
@@ -836,14 +836,14 @@ namespace org.lb.NLisp
 
     #region User Interface
 
-    internal sealed class Lisp
+    internal sealed class NLisp
     {
         private readonly Environment global = new Environment();
         private readonly Reader reader;
 
         public event Action<string> Print = delegate { };
 
-        public Lisp()
+        public NLisp()
         {
             reader = new Reader(this);
 
