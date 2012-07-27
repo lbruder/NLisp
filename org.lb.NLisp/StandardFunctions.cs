@@ -142,6 +142,20 @@ namespace org.lb.NLisp
         }
     }
 
+    internal sealed class BuiltinSubstringFunction : BuiltinLispFunction
+    {
+        public BuiltinSubstringFunction() : base("substring") { }
+        public override LispObject Call(List<LispObject> parameters)
+        {
+            AssertParameterCountAtLeast(parameters, 2);
+            string str = ((LispString)parameters[0]).Value;
+            int from = ((Number)parameters[1]).NumberAsInt;
+            return FromClrObject(parameters.Count == 2
+                ? str.Substring(from)
+                : str.Substring(from, ((Number)parameters[2]).NumberAsInt-from));
+        }
+    }
+
     internal sealed class BuiltinUnaryOperationFunction : BuiltinLispFunction
     {
         private readonly Func<LispObject, LispObject> op;

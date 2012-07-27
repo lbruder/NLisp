@@ -55,8 +55,7 @@ namespace org.lb.NLisp
             }
             if (c == '(') return ReadCons(mode);
             if (c == '"') return ReadString();
-            if (char.IsDigit(c)) return ReadNumber();
-            return ReadSymbol();
+            return ReadSymbolOrNumber();
         }
 
         private void SkipWhitespace()
@@ -126,17 +125,11 @@ namespace org.lb.NLisp
             return new LispString(ret.ToString());
         }
 
-        private LispObject ReadNumber()
-        {
-            var value = new StringBuilder();
-            while (reader.Peek() != -1 && (Char.IsNumber(Peek()) || Peek() == '.')) value.Append((char)reader.Read());
-            return new Number(double.Parse(value.ToString(), CultureInfo.InvariantCulture));
-        }
-
-        private LispObject ReadSymbol()
+        private LispObject ReadSymbolOrNumber()
         {
             var value = new StringBuilder();
             while (reader.Peek() != -1 && (Peek() != ')' && !Char.IsWhiteSpace(Peek()))) value.Append((char)reader.Read());
+            double d; if (double.TryParse(value.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out d)) return new Number(d);
             return Symbol.fromString(value.ToString());
         }
     }

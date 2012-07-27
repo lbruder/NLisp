@@ -5,22 +5,13 @@ using System.IO;
 namespace org.lb.NLisp
 {
     // TODO:
+    // - substring
     // - augment lambda with &rest parameters
     // - quasiquoting
-    // - comments
-    // - some basic(!) kind of while... loop. Or tagbody? Or TCO (prob Environments)?
+    // - clr FFI
 
-    // - clr-methods
-    // - clr-properties
-    // - clr-get
-    // - clr-set
-    // - clr-new
-    // - clr-call (".")
-
-    // - apply
-    // - eval
     // - port operations (strings, files, sockets)
-    // - read (from port)
+    // - apply, eval, read
     // - thread, join, semaphore, sem-p, sem-v
 
     public sealed class NLisp
@@ -40,6 +31,7 @@ namespace org.lb.NLisp
             SetVariable("reduce", new BuiltinReduceFunction());
             SetVariable("range", new BuiltinRangeFunction());
             SetVariable("gensym", new BuiltinGensymFunction());
+            SetVariable("substring", new BuiltinSubstringFunction());
 
             AddUnaryFunction("car", obj => obj.Car());
             AddUnaryFunction("cdr", obj => obj.Cdr());

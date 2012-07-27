@@ -14,6 +14,7 @@ namespace org.lb.NLisp
         private static readonly Symbol defunSym = Symbol.fromString("defun");
         private static readonly Symbol setSym = Symbol.fromString("setq");
         private static readonly Symbol lambdaSym = Symbol.fromString("lambda");
+        private static readonly Symbol whileSym = Symbol.fromString("while");
 
         private readonly LispObject car;
         private readonly LispObject cdr;
@@ -38,6 +39,7 @@ namespace org.lb.NLisp
             if (setSym.Equals(car)) return EvalSet(env);
             if (lambdaSym.Equals(car)) return EvalLambda(env);
             if (defunSym.Equals(car)) return EvalDefun(env);
+            if (whileSym.Equals(car)) return EvalWhile(env);
             return EvalCall(env);
         }
 
@@ -89,6 +91,14 @@ namespace org.lb.NLisp
             if (asArray[2] is ConsCell) return env.Define((Symbol)asArray[1], new Lambda(env, (ConsCell)asArray[2], this.Skip(3).ToList()));
             if (asArray[2] is Nil) return env.Define((Symbol)asArray[1], new Lambda(env, new LispObject[] { }, this.Skip(3).ToList()));
             throw new LispListExpectedException(asArray[2]);
+        }
+
+        private LispObject EvalWhile(Environment env)
+        {
+            var asArray = this.ToArray();
+            if (asArray.Length < 3) throw new LispExpectedAtLeastNParametersGotMException(car, 2, asArray.Length - 1);
+            while (asArray[1].Eval(env).IsTrue()) for (int i = 2; i < asArray.Length; ++i) asArray[i].Eval(env);
+            return Nil.GetInstance();
         }
 
         private LispObject EvalCall(Environment env)
