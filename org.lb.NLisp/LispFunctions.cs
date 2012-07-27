@@ -43,26 +43,47 @@ namespace org.lb.NLisp
 
     internal sealed class Lambda : BuiltinLispFunction
     {
+        private static readonly Symbol restSym = Symbol.fromString("&rest");
+
         private readonly Environment outerEnvironment;
         private readonly Symbol[] parameterNames;
+        private readonly bool hasRestParameter;
         private readonly List<LispObject> body;
+
         public override string ToString() { return "Lambda"; }
+
         public Lambda(Environment env, IEnumerable<LispObject> parameterNames, List<LispObject> body)
             : base("lambda")
         {
             outerEnvironment = env;
             this.parameterNames = parameterNames.Cast<Symbol>().ToArray();
+            this.hasRestParameter = this.parameterNames.Length >= 2 && restSym.Equals(this.parameterNames[this.parameterNames.Length - 2]);
             this.body = body;
         }
 
         public override LispObject Call(List<LispObject> parameters)
         {
-            AssertParameterCount(parameters, parameterNames.Length);
-            Environment inner = new Environment(outerEnvironment);
-            for (int i = 0; i < parameterNames.Length; ++i) inner.Define(parameterNames[i], parameters[i]);
+            var inner = hasRestParameter ? GetEnvironmentWithRestParameter(parameters) : GetEnvironmentWithoutRestParameter(parameters);
             LispObject ret = Nil.GetInstance();
             foreach (var i in body) ret = i.Eval(inner);
             return ret;
+        }
+
+        private Environment GetEnvironmentWithRestParameter(List<LispObject> parameters)
+        {
+            AssertParameterCountAtLeast(parameters, parameterNames.Length - 2);
+            Environment inner = new Environment(outerEnvironment);
+            for (int i = 0; i < parameterNames.Length - 2; ++i) inner.Define(parameterNames[i], parameters[i]);
+            inner.Define(parameterNames[parameterNames.Length - 1], FromClrObject(parameters.Skip(parameterNames.Length - 2).ToList()));
+            return inner;
+        }
+
+        private Environment GetEnvironmentWithoutRestParameter(List<LispObject> parameters)
+        {
+            AssertParameterCount(parameters, parameterNames.Length);
+            Environment inner = new Environment(outerEnvironment);
+            for (int i = 0; i < parameterNames.Length; ++i) inner.Define(parameterNames[i], parameters[i]);
+            return inner;
         }
     }
 }

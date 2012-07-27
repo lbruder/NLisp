@@ -1,11 +1,8 @@
 ; TODO:
+; equalp, assoc, string manipulation functions
 ; cond macro
-; range as function based on "while" special form (needs &rest capability OR default parameter values)
-; list as function based on &rest capability
-; string manipulation functions
-; let over lambda (=> optimize other macros)
-; equalp, and, or, assoc, ...
 ; setf macro!
+; As soon as &rest capability is implemented: let, range, list, and, or
 ; As soon as (if) TCO is implemented: while as macro, optimizations galore.
 
 (defun not (x) (if x nil t))
@@ -46,8 +43,8 @@
   (define ret nil)
   (while lst
     (if (f (car lst))
-      (push (car lst) ret)
-      nil)
+        (push (car lst) ret)
+        nil)
     (setq lst (cdr lst)))
   (nreverse ret))
 
