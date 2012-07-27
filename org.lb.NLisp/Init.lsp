@@ -1,10 +1,6 @@
-; TODO:
-; equalp, assoc, string manipulation functions
-; cond macro
-; setf macro!
-; As soon as &rest capability is implemented: let, range, list, and, or
-; As soon as (if) TCO is implemented: while as macro, optimizations galore.
+; TODO: let, and, or, equalp, assoc, string manipulation functions, cond macro
 
+(defun list (&rest args) args)
 (defun not (x) (if x nil t))
 (defun <= (a b) (not (> a b)))
 (defun >= (a b) (not (< a b)))
@@ -12,6 +8,7 @@
 (defun cadr (x) (car (cdr x)))
 (defun cdar (x) (cdr (car x)))
 (defun cddr (x) (cdr (cdr x)))
+(defun caddr (x) (car (cdr (cdr x))))
 (defun abs (x) (if (< x 0) (- 0 x) x))
 (defun evenp (x) (= 0 (mod x 2)))
 (defun oddp (x) (not (evenp x)))
@@ -71,3 +68,22 @@
         (lambda (acc item) (if acc acc (f item)))
         (cons nil lst))
       nil))
+
+(defun range (&rest args)
+  (define arglen (length args))
+  (define from 0)
+  (define to 0)
+  (define step 1)
+  (if (= 1 arglen)
+      (setq to (car args))
+      (progn
+        (setq from (car args))
+        (setq to (cadr args))
+        (if (> arglen 2)
+            (setq step (caddr args))
+            nil)))
+  (define ret nil)
+  (while (< from to)
+    (push from ret)
+    (setq from (+ from step)))
+  (reverse ret))

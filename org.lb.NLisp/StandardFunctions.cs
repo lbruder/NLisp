@@ -45,43 +45,6 @@ namespace org.lb.NLisp
         }
     }
 
-    internal sealed class BuiltinListFunction : BuiltinLispFunction
-    {
-        public BuiltinListFunction() : base("list") { }
-        public override LispObject Call(List<LispObject> parameters) { return FromClrObject(parameters); }
-    }
-
-    internal sealed class BuiltinRangeFunction : BuiltinLispFunction
-    {
-        public BuiltinRangeFunction() : base("range") { }
-        public override LispObject Call(List<LispObject> parameters)
-        {
-            int from = 0;
-            int to;
-            int step = 1;
-            AssertParameterCountAtLeast(parameters, 1);
-            switch (parameters.Count)
-            {
-                case 1:
-                    to = ((Number)parameters[0]).NumberAsInt;
-                    break;
-                case 2:
-                    from = ((Number)parameters[0]).NumberAsInt;
-                    to = ((Number)parameters[1]).NumberAsInt;
-                    break;
-                default:
-                    from = ((Number)parameters[0]).NumberAsInt;
-                    to = ((Number)parameters[1]).NumberAsInt;
-                    step = ((Number)parameters[2]).NumberAsInt;
-                    break;
-            }
-
-            var ret = new List<LispObject>();
-            for (int i = from; i < to; i += step) ret.Add(new Number(i));
-            return FromClrObject(ret);
-        }
-    }
-
     internal sealed class BuiltinSubstringFunction : BuiltinLispFunction
     {
         public BuiltinSubstringFunction() : base("substring") { }

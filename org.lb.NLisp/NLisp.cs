@@ -5,7 +5,6 @@ using System.IO;
 namespace org.lb.NLisp
 {
     // TODO:
-    // - augment lambda with &rest parameters
     // - quasiquoting
     // - clr FFI
 
@@ -24,8 +23,6 @@ namespace org.lb.NLisp
         {
             reader = new Reader(this);
 
-            SetVariable("list", new BuiltinListFunction());
-            SetVariable("range", new BuiltinRangeFunction());
             SetVariable("gensym", new BuiltinGensymFunction());
             SetVariable("substring", new BuiltinSubstringFunction());
 
