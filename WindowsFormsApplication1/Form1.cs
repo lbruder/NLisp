@@ -31,7 +31,7 @@ namespace WindowsFormsApplication1
             try
             {
                 Print("> run");
-                Measure(() => lisp.EvaluateScript(textBox2.Lines));
+                Measure(() => lisp.Evaluate(string.Join("\n", textBox2.Lines)));
                 textBox3.Focus();
             }
             catch (Exception ex)

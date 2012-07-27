@@ -119,7 +119,7 @@
   </resheader>
   <data name="textBox2.Text" xml:space="preserve">
     <value>(defmacro even-macro (x)
-  (list '= 0 (list 'rem x 2)))
+  (list '= 0 (list 'mod x 2)))
 
 (defun primep (n)
     (if (&lt; n 4)
@@ -127,7 +127,7 @@
         (if (even-macro n)
             nil
             (all
-              (lambda (i) (&lt; 0 (rem n i)))
+              (lambda (i) (&lt; 0 (mod n i)))
               (range 3 n 2)))))
 
 (print (filter primep (range 1000)))</value>

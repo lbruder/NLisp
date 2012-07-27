@@ -925,15 +925,27 @@ namespace org.lb.NLisp
             AddBinaryFunction(">=", (o1, o2) => o1.Ge(o2));
         }
 
-        public LispObject Evaluate(string expression) { return reader.Read(new StringReader(expression)).Eval(global); }
-        public LispObject EvaluateScript(string[] script) { return Evaluate("(progn " + string.Join("\n", script) + ")"); }
-        internal LispObject Eval(List<LispObject> ast) { return LispObject.FromClrObject(ast).Eval(global); }
+        public LispObject Evaluate(string script)
+        {
+            LispObject ret = LispNil.GetInstance();
+            var stream = new StringReader(script);
+            SkipWhitespaceInStream(stream);
+            while (stream.Peek() != -1)
+            {
+                ret = reader.Read(stream).Eval(global);
+                SkipWhitespaceInStream(stream);
+            }
+            return ret;
+        }
 
         public void SetVariable(string identifier, object value) { global.Define(LispSymbol.fromString(identifier), LispObject.FromClrObject(value)); }
         public void AddFunction(string identifier, Delegate f) { SetVariable(identifier, f); }
 
+        internal LispObject Eval(List<LispObject> ast) { return LispObject.FromClrObject(ast).Eval(global); }
+
         private void AddUnaryFunction(string name, Func<LispObject, LispObject> op) { SetVariable(name, new BuiltinUnaryOperationFunction(name, op)); }
         private void AddBinaryFunction(string name, Func<LispObject, LispObject, LispObject> op) { SetVariable(name, new BuiltinBinaryOperationFunction(name, op)); }
+        private static void SkipWhitespaceInStream(TextReader stream) { while (char.IsWhiteSpace((char)stream.Peek())) stream.Read(); }
     }
 
     #endregion
