@@ -98,7 +98,10 @@ namespace org.lb.NLisp
 
             Lambda macro = null;
             if (cell.Car() is Symbol) macro = global.GetMacro((Symbol)cell.Car());
-            if (macro != null) return macro.Call(tmp);
+            if (macro != null) {
+                expandP = true;
+                return macro.Call(tmp);
+            }
             tmp.Insert(0, cell.Car());
             return LispObject.FromClrObject(tmp);
         }
