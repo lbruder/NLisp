@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace org.lb.NLisp
 {
@@ -71,24 +72,43 @@ namespace org.lb.NLisp
         public void AddFunction(string identifier, Delegate f) { SetVariable(identifier, f); }
 
         internal LispObject Eval(List<LispObject> ast) { return LispObject.FromClrObject(ast).Eval(global); }
-	internal void AddMacro(string identifier, Lambda expansionFunction) { global.DefineMacro(Symbol.fromString(identifier), expansionFunction); }
+        internal void AddMacro(Symbol identifier, Lambda expansionFunction) { global.DefineMacro(identifier, expansionFunction); }
 
         private void AddUnaryFunction(string name, Func<LispObject, LispObject> op) { SetVariable(name, new BuiltinUnaryOperationFunction(name, op)); }
         private void AddBinaryFunction(string name, Func<LispObject, LispObject, LispObject> op) { SetVariable(name, new BuiltinBinaryOperationFunction(name, op)); }
         private static void SkipWhitespaceInStream(TextReader stream) { while (char.IsWhiteSpace((char)stream.Peek())) stream.Read(); }
 
-	internal LispObject Macroexpand1(LispObject objectToExpand, out bool expandP)
-	{
-		expandP = false;
-		return objectToExpand; // TODO
-	}
+        internal LispObject Macroexpand1(LispObject objectToExpand, out bool expandP)
+        {
+            expandP = false;
+            if (objectToExpand is ConsCell) return ExpandCons1((ConsCell)objectToExpand, out expandP);
+            return objectToExpand;
+        }
 
-	internal LispObject Macroexpand(LispObject objectToExpand)
-	{
-		bool expandP = true;
-		LispObject ret = objectToExpand;
-		while (expandP) ret = Macroexpand1(ret, out expandP);
-		return ret;
-	}
+        internal LispObject ExpandCons1(ConsCell cell, out bool expandP)
+        {
+            bool expanded = false;
+            expandP = false;
+            var tmp = new List<LispObject>();
+            foreach (var i in cell.Skip(1))
+            {
+                tmp.Add(Macroexpand1(i, out expanded));
+                if (expanded) expandP = true;
+            }
+
+            Lambda macro = null;
+            if (cell.Car() is Symbol) macro = global.GetMacro((Symbol)cell.Car());
+            if (macro != null) return macro.Call(tmp);
+            tmp.Insert(0, cell.Car());
+            return LispObject.FromClrObject(tmp);
+        }
+
+        internal LispObject Macroexpand(LispObject objectToExpand)
+        {
+                bool expandP = true;
+                LispObject ret = objectToExpand;
+                while (expandP) ret = Macroexpand1(ret, out expandP);
+                return ret;
+        }
     }
 }

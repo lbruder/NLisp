@@ -89,9 +89,13 @@ namespace org.lb.NLisp
                 Symbol symbol = (Symbol)list[0];
                 if (defmacroSymbol.Equals(symbol))
                 {
+                    Symbol name = (Symbol)list[1];
+                    macros.Add(name);
                     list[0] = Symbol.fromString("defun");
-                    macros.Add((Symbol)list[1]);
                     lisp.Eval(list);
+                    list[0] = Symbol.fromString("lambda");
+                    list.RemoveAt(1);
+                    lisp.AddMacro(name, (Lambda) lisp.Eval(list));
                     return T.GetInstance();
                 }
                 if (macros.Contains(symbol))
