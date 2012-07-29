@@ -10,7 +10,6 @@ namespace org.lb.NLisp
     {
         private static readonly Symbol defmacroSymbol = Symbol.fromString("defmacro");
         private static readonly Symbol quoteSymbol = Symbol.fromString("quote");
-        private readonly HashSet<Symbol> macros = new HashSet<Symbol>();
         private readonly NLisp lisp;
         private TextReader reader;
 
@@ -86,27 +85,18 @@ namespace org.lb.NLisp
         {
             if (mode == Mode.normal && list.Count > 0 && list[0] is Symbol)
             {
-                Symbol symbol = (Symbol)list[0];
-                if (defmacroSymbol.Equals(symbol))
+                if (defmacroSymbol.Equals((Symbol)list[0]))
                 {
                     Symbol name = (Symbol)list[1];
-                    macros.Add(name);
-                    list[0] = Symbol.fromString("defun");
-                    lisp.Eval(list);
                     list[0] = Symbol.fromString("lambda");
                     list.RemoveAt(1);
                     lisp.AddMacro(name, (Lambda) lisp.Eval(list));
                     return T.GetInstance();
                 }
-                if (macros.Contains(symbol))
-                {
-                    // Quote all parameters to prevent premature evaluation
-                    for (int i = 1; i < list.Count; ++i)
-                        list[i] = ConsCell.Cons(quoteSymbol, ConsCell.Cons(list[i], Nil.GetInstance()));
-                    return lisp.Eval(list);
-                }
             }
-            return LispObject.FromClrObject(list);
+            return (mode == Mode.normal)
+                ? lisp.Macroexpand(LispObject.FromClrObject(list))
+                : LispObject.FromClrObject(list);
         }
 
         private LispObject ReadString()

@@ -38,7 +38,6 @@ namespace org.lb.NLisp
             AddUnaryFunction("reverse", LispStandardFunctions.Reverse); // TODO: Implement in Init.lsp
             AddUnaryFunction("nreverse", LispStandardFunctions.Reverse); // TODO: Implement in Init.lsp
             AddUnaryFunction("print", obj => { Print(obj.ToString()); return obj; });
-            AddUnaryFunction("macroexpand-1", obj => { bool p; return Macroexpand1(obj, out p); });
             AddUnaryFunction("macroexpand", Macroexpand);
 
             AddBinaryFunction("eq", (o1, o2) => LispObject.FromClrObject((o1 == o2) || (o1 is Number && o1.Equals(o2))));
