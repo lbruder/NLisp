@@ -34,9 +34,11 @@ namespace org.lb.NLisp
             AddUnaryFunction("numberp", obj => LispObject.FromClrObject(obj is Number));
             AddUnaryFunction("stringp", obj => LispObject.FromClrObject(obj is LispString));
             AddUnaryFunction("length", LispStandardFunctions.Length);
-            AddUnaryFunction("reverse", LispStandardFunctions.Reverse);
-            AddUnaryFunction("nreverse", LispStandardFunctions.Reverse); // For now
+            AddUnaryFunction("reverse", LispStandardFunctions.Reverse); // TODO: Implement in Init.lsp
+            AddUnaryFunction("nreverse", LispStandardFunctions.Reverse); // TODO: Implement in Init.lsp
             AddUnaryFunction("print", obj => { Print(obj.ToString()); return obj; });
+            AddUnaryFunction("macroexpand-1", obj => { bool p; return Macroexpand1(obj, out p); });
+            AddUnaryFunction("macroexpand", Macroexpand);
 
             AddBinaryFunction("eq", (o1, o2) => LispObject.FromClrObject((o1 == o2) || (o1 is Number && o1.Equals(o2))));
             AddBinaryFunction("cons", ConsCell.Cons);
@@ -69,9 +71,24 @@ namespace org.lb.NLisp
         public void AddFunction(string identifier, Delegate f) { SetVariable(identifier, f); }
 
         internal LispObject Eval(List<LispObject> ast) { return LispObject.FromClrObject(ast).Eval(global); }
+	internal void AddMacro(string identifier, Lambda expansionFunction) { global.DefineMacro(Symbol.fromString(identifier), expansionFunction); }
 
         private void AddUnaryFunction(string name, Func<LispObject, LispObject> op) { SetVariable(name, new BuiltinUnaryOperationFunction(name, op)); }
         private void AddBinaryFunction(string name, Func<LispObject, LispObject, LispObject> op) { SetVariable(name, new BuiltinBinaryOperationFunction(name, op)); }
         private static void SkipWhitespaceInStream(TextReader stream) { while (char.IsWhiteSpace((char)stream.Peek())) stream.Read(); }
+
+	internal LispObject Macroexpand1(LispObject objectToExpand, out bool expandP)
+	{
+		expandP = false;
+		return objectToExpand; // TODO
+	}
+
+	internal LispObject Macroexpand(LispObject objectToExpand)
+	{
+		bool expandP = true;
+		LispObject ret = objectToExpand;
+		while (expandP) ret = Macroexpand1(ret, out expandP);
+		return ret;
+	}
     }
 }

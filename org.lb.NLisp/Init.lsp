@@ -1,4 +1,4 @@
-; TODO: and, or, equalp, assoc, string manipulation functions, cond macro
+; TODO: equalp, assoc, string manipulation functions, cond macro
 
 (defun list (&rest args) args)
 (defun not (x) (if x nil t))
@@ -96,3 +96,18 @@
     (push from ret)
     (setq from (+ from step)))
   (reverse ret))
+
+(defmacro and (&rest args)
+  (defun expand (x)
+    (if (cdr x)
+        (list 'if (car x) (expand (cdr x)) nil)
+        (car x)))
+  (expand args))
+
+; TODO: Use let with gensym to avoid evaluating (car x) twice!
+(defmacro or (&rest args)
+  (defun expand (x)
+    (if (cdr x)
+        (list 'if (car x) (car x) (expand (cdr x)))
+        (car x)))
+  (expand args))
