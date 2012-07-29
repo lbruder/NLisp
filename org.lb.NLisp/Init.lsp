@@ -1,3 +1,5 @@
+; vim: et:lisp:ai
+
 ; TODO: equalp, assoc, string manipulation functions, cond macro
 
 (defun list (&rest args) args)
@@ -104,10 +106,13 @@
         (car x)))
   (expand args))
 
-; TODO: Use let with gensym to avoid evaluating (car x) twice!
 (defmacro or (&rest args)
+  (define sym (gensym))
   (defun expand (x)
     (if (cdr x)
-        (list 'if (car x) (car x) (expand (cdr x)))
+        (list 'progn (list 'setq sym (car x)) (list 'if sym sym (expand (cdr x))))
         (car x)))
-  (expand args))
+  (list (list 'lambda '()
+    (list 'define sym 'nil)
+    (expand args))))
+
