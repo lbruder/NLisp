@@ -54,14 +54,14 @@ namespace org.lb.NLisp
             AddUnaryFunction("sys:open-file-for-input", filename => LispObject.FromClrObject(File.OpenRead(((LispString)filename).Value)));
             AddUnaryFunction("sys:open-file-for-output", filename => LispObject.FromClrObject(File.OpenWrite(((LispString)filename).Value)));
 
-            AddBinaryFunction("sys:print-to-stream", (obj, stream) =>
+            AddBinaryFunction("sys:print", (obj, stream) =>
             {
                 if (!(stream is LispStream)) throw new InvalidOperationException(obj, "print");
                 ((LispStream)stream).GetWriteStream().Write(obj.ToString() + "\n");
                 return obj;
             });
 
-            AddUnaryFunction("sys:read-from-stream", obj =>
+            AddUnaryFunction("sys:read", obj =>
             {
                 if (!(obj is LispStream)) throw new InvalidOperationException(obj, "read");
                 var stream = ((LispStream)obj).GetReadStream();
@@ -69,7 +69,7 @@ namespace org.lb.NLisp
                 return stream.Peek() == -1 ? Nil.GetInstance() : reader.Read(stream, false);
             });
 
-            AddUnaryFunction("sys:read-line-from-stream", obj =>
+            AddUnaryFunction("sys:read-line", obj =>
             {
                 if (!(obj is LispStream)) throw new InvalidOperationException(obj, "read-line");
                 var stream = ((LispStream)obj).GetReadStream();
