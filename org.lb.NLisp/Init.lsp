@@ -91,9 +91,7 @@
   (define arglen (length args))
   (if (= 1 arglen)
       (values 0 (car args) 1)
-      (if (> arglen 2)
-          (values (car args) (cadr args) (caddr args))
-          (values (car args) (cadr args) 1))))
+      (values (car args) (cadr args) (if (> arglen 2) (caddr args) 1))))
 
 (defmacro and (&rest args)
   (defun expand (x)
@@ -124,5 +122,17 @@
                      (list var 'nil))
       body
       (list 'setq var 'nil)
+      (or result-form 'nil))))
+
+(defmacro dotimes (var-count-form &rest body)
+  (let ((var         (car var-count-form))
+        (count-form  (cadr var-count-form))
+        (result-form (caddr var-count-form))
+        (sym         (gensym)))
+    (push (list '< var sym) body)
+    (push 'while body)
+    (list 'let (list (list sym count-form)
+                     (list var 0))
+      (+ body (list (list 'incf var)))
       (or result-form 'nil))))
 
