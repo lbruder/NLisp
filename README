@@ -29,6 +29,7 @@ A quick overview:
 - nullp, consp, symbolp, stringp, numberp, length, reverse, eq, substring
 - push, pop
 - caar, cadr, cdar, cddr
+- and, or, dolist, dotimes
 - lexical scoping
 - minimal arithmetic (all numbers are double FOR NOW):
   +, -, *, /, mod, =, >, <, <=, >=
@@ -46,9 +47,8 @@ A quick overview:
 Plans:
 - Quasiquoting
 - string operations
-- eval
-- port operations (files, strings as streams, sockets...)
-- read (from port)
+- strings as streams
+- sockets
 
 
 CLR FFI:
