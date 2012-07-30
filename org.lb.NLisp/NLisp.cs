@@ -36,7 +36,6 @@ namespace org.lb.NLisp
             AddUnaryFunction("numberp", obj => LispObject.FromClrObject(obj is Number));
             AddUnaryFunction("stringp", obj => LispObject.FromClrObject(obj is LispString));
             AddUnaryFunction("length", LispStandardFunctions.Length);
-            AddUnaryFunction("reverse", LispStandardFunctions.Reverse); // TODO: Implement in Init.lsp
             AddUnaryFunction("print", obj => { Print(obj.ToString()); return obj; });
             AddUnaryFunction("macroexpand-1", obj => { bool expandP; return Macroexpand1(obj, out expandP); });
             AddUnaryFunction("macroexpand", Macroexpand);

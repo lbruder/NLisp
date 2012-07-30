@@ -39,6 +39,12 @@
       sym)
     (list 'car listvar)))
 
+(defun reverse (lst)
+  (define ret nil)
+  (while lst
+    (push (pop lst) ret))
+  ret)
+
 (define nreverse reverse) ; TODO
 
 (defun map (f lst)
@@ -98,7 +104,7 @@
     (while (< from to)
       (push from ret)
       (setq from (+ from step)))
-    (reverse ret))
+    (nreverse ret))
   (define arglen (length args))
   (if (= 1 arglen)
       (values 0 (car args) 1)

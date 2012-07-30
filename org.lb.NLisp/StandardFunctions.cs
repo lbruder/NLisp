@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace org.lb.NLisp
 {
@@ -10,27 +9,6 @@ namespace org.lb.NLisp
         {
             if (obj is IEnumerable<LispObject>) return LispObject.FromClrObject(((IEnumerable<LispObject>)obj).Count());
             throw new InvalidOperationException(obj, "length");
-        }
-
-        public static LispObject Reverse(LispObject list)
-        {
-            if (list is LispString)
-            {
-                string s = ((LispString)list).Value;
-                var sb = new StringBuilder(s.Length);
-                for (int i = s.Length - 1; i >= 0; --i) sb.Append(s[i]);
-                return LispObject.FromClrObject(sb.ToString());
-            }
-
-            LispObject ret = Nil.GetInstance();
-            while (!list.NullP())
-            {
-                ret = ConsCell.Cons(list.Car(), ret);
-                list = list.Cdr();
-                if (list is Nil) break;
-                if (!(list is ConsCell)) return ConsCell.Cons(list, ret);
-            }
-            return ret;
         }
     }
 
