@@ -40,6 +40,7 @@
     <Compile Include="ConsCell.cs" />
     <Compile Include="LispFunctions.cs" />
     <Compile Include="LispObject.cs" />
+    <Compile Include="LispStream.cs" />
     <Compile Include="LispString.cs" />
     <Compile Include="NLisp.cs" />
     <Compile Include="Number.cs" />

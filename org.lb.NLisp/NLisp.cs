@@ -51,36 +51,36 @@ namespace org.lb.NLisp
             AddBinaryFunction("<", (o1, o2) => o1.Lt(o2));
             AddBinaryFunction(">", (o1, o2) => o1.Gt(o2));
 
-            AddUnaryFunction("close", obj =>
-            {
-                if (!(obj is IDisposable)) throw new InvalidOperationException(obj, "close");
-                ((IDisposable)obj).Dispose();
-                return T.GetInstance();
-            });
-
-            AddUnaryFunction("sys:open-file-for-input", filename => LispObject.FromClrObject(File.OpenText(((LispString)filename).Value)));
-            AddUnaryFunction("sys:open-file-for-output", filename => LispObject.FromClrObject(new StreamWriter(File.OpenWrite(((LispString)filename).Value))));
+            AddUnaryFunction("sys:open-file-for-input", filename => LispObject.FromClrObject(File.OpenRead(((LispString)filename).Value)));
+            AddUnaryFunction("sys:open-file-for-output", filename => LispObject.FromClrObject(File.OpenWrite(((LispString)filename).Value)));
 
             AddBinaryFunction("sys:print-to-stream", (obj, stream) =>
             {
-                if (!(stream is LispWriteStream)) throw new InvalidOperationException(obj, "print");
-                ((LispWriteStream)stream).GetStream().Write(obj.ToString() + "\n");
+                if (!(stream is LispStream)) throw new InvalidOperationException(obj, "print");
+                ((LispStream)stream).GetWriteStream().Write(obj.ToString() + "\n");
                 return obj;
             });
 
             AddUnaryFunction("sys:read-from-stream", obj =>
             {
-                if (!(obj is LispReadStream)) throw new InvalidOperationException(obj, "read");
-                var stream = ((LispReadStream)obj).GetStream();
+                if (!(obj is LispStream)) throw new InvalidOperationException(obj, "read");
+                var stream = ((LispStream)obj).GetReadStream();
                 SkipWhitespaceInStream(stream);
                 return stream.Peek() == -1 ? Nil.GetInstance() : reader.Read(stream, false);
             });
 
             AddUnaryFunction("sys:read-line-from-stream", obj =>
             {
-                if (!(obj is LispReadStream)) throw new InvalidOperationException(obj, "read-line");
-                var stream = ((LispReadStream)obj).GetStream();
+                if (!(obj is LispStream)) throw new InvalidOperationException(obj, "read-line");
+                var stream = ((LispStream)obj).GetReadStream();
                 return stream.Peek() == -1 ? Nil.GetInstance() : LispObject.FromClrObject(stream.ReadLine());
+            });
+
+            AddUnaryFunction("sys:close", obj =>
+            {
+                if (!(obj is IDisposable)) throw new InvalidOperationException(obj, "close");
+                ((IDisposable)obj).Dispose();
+                return T.GetInstance();
             });
 
             if (File.Exists("Init.lsp")) Evaluate(File.ReadAllText("Init.lsp"));

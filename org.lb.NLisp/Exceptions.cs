@@ -20,6 +20,22 @@ namespace org.lb.NLisp
         }
     }
 
+    public sealed class StreamNotReadableException : Exception
+    {
+        internal StreamNotReadableException()
+            : base("Stream is not readable") // TODO: I18N
+        {
+        }
+    }
+
+    public sealed class StreamNotWritableException : Exception
+    {
+        internal StreamNotWritableException()
+            : base("Stream is not readable") // TODO: I18N
+        {
+        }
+    }
+
     public sealed class ObjectCouldNotBeConvertedException : Exception
     {
         internal ObjectCouldNotBeConvertedException(object obj)
