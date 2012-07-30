@@ -14,7 +14,6 @@ namespace WindowsFormsApplication1
             InitializeComponent();
             lisp = new NLisp();
             lisp.Print += Print;
-            textBox3.Text = "(let ((a 1) (b 2)) (print (+ a b)))";
         }
 
         private void Form1_KeyUp(object sender, KeyEventArgs e)

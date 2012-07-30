@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.IO;
 
 namespace org.lb.NLisp
 {
@@ -35,6 +36,8 @@ namespace org.lb.NLisp
             if (source is float) return new Number((float)source);
             if (source is double) return new Number((double)source);
             if (source is string) return new LispString((string)source);
+            if (source is TextReader) return new LispReadStream((TextReader)source);
+            if (source is TextWriter) return new LispWriteStream((TextWriter)source);
             if (source is IList)
             {
                 LispObject ret = Nil.GetInstance();
@@ -56,7 +59,7 @@ namespace org.lb.NLisp
         internal override LispObject Cdr() { return this; }
         internal override bool NullP() { return true; }
         public override bool IsTrue() { return false; }
-        internal override LispObject Eval(Environment env) { throw new CannotEvaluateEmptyListException(); }
+        internal override LispObject Eval(Environment env) { return this; }
         public override string ToString() { return "NIL"; }
         public override bool Equals(object obj) { return obj is Nil; }
         public override int GetHashCode() { return 4711; }
@@ -71,5 +74,39 @@ namespace org.lb.NLisp
         public override string ToString() { return "T"; }
         public override bool Equals(object obj) { return obj is T; }
         public override int GetHashCode() { return 0815; }
+    }
+
+    internal sealed class LispReadStream : LispObject, IDisposable
+    {
+        private readonly TextReader stream;
+        public TextReader GetStream() { return stream; }
+        public LispReadStream(TextReader stream) { this.stream = stream; }
+        internal override LispObject Eval(Environment env) { throw new StreamCanNotBeEvaluatedException(); }
+        public override string ToString() { return "#<read-stream>"; }
+        public override bool Equals(object obj) { return obj is LispReadStream && ((LispReadStream)obj).stream.Equals(stream); }
+        public override int GetHashCode() { return stream.GetHashCode(); }
+        ~LispReadStream() { Dispose(); }
+        public void Dispose()
+        {
+            stream.Dispose();
+            GC.SuppressFinalize(this);
+        }
+    }
+
+    internal sealed class LispWriteStream : LispObject, IDisposable
+    {
+        private readonly TextWriter stream;
+        public TextWriter GetStream() { return stream; }
+        public LispWriteStream(TextWriter stream) { this.stream = stream; }
+        internal override LispObject Eval(Environment env) { throw new StreamCanNotBeEvaluatedException(); }
+        public override string ToString() { return "#<write-stream>"; }
+        public override bool Equals(object obj) { return obj is LispWriteStream && ((LispWriteStream)obj).stream.Equals(stream); }
+        public override int GetHashCode() { return stream.GetHashCode(); }
+        ~LispWriteStream() { Dispose(); }
+        public void Dispose()
+        {
+            stream.Dispose();
+            GC.SuppressFinalize(this);
+        }
     }
 }

@@ -12,6 +12,7 @@ namespace org.lb.NLisp
         private static readonly Symbol quoteSymbol = Symbol.fromString("quote");
         private readonly NLisp lisp;
         private TextReader reader;
+        private bool expandMacros;
 
         private enum Mode
         {
@@ -32,8 +33,9 @@ namespace org.lb.NLisp
             return (char)p;
         }
 
-        public LispObject Read(TextReader rd)
+        public LispObject Read(TextReader rd, bool expandMacros)
         {
+            this.expandMacros = expandMacros;
             reader = rd;
             return Read(Mode.normal);
         }
@@ -83,6 +85,8 @@ namespace org.lb.NLisp
 
         private LispObject EvalMacros(Mode mode, List<LispObject> list)
         {
+            if (!expandMacros) return LispObject.FromClrObject(list);
+
             if (mode == Mode.normal && list.Count > 0 && list[0] is Symbol)
             {
                 if (defmacroSymbol.Equals(list[0]))
@@ -90,7 +94,7 @@ namespace org.lb.NLisp
                     Symbol name = (Symbol)list[1];
                     list[0] = Symbol.fromString("lambda");
                     list.RemoveAt(1);
-                    lisp.AddMacro(name, (Lambda) lisp.Eval(list));
+                    lisp.AddMacro(name, (Lambda)lisp.Eval(list));
                     return T.GetInstance();
                 }
             }

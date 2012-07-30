@@ -12,10 +12,10 @@ namespace org.lb.NLisp
         }
     }
 
-    public sealed class CannotEvaluateEmptyListException : Exception
+    public sealed class StreamCanNotBeEvaluatedException : Exception
     {
-        internal CannotEvaluateEmptyListException()
-            : base("Can not evaluate empty list") // TODO: I18N
+        internal StreamCanNotBeEvaluatedException()
+            : base("Streams can not be evaluated") // TODO: I18N
         {
         }
     }
