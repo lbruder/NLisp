@@ -46,10 +46,9 @@ namespace org.lb.NLisp
             return outer.Get(symbol);
         }
 
-        public LispObject DefineMacro(Symbol symbol, Lambda value)
+        public void DefineMacro(Symbol symbol, Lambda value)
         {
             macros[symbol] = value;
-            return value;
         }
 
         public Lambda GetMacro(Symbol symbol)
@@ -61,4 +60,3 @@ namespace org.lb.NLisp
         }
     }
 }
-

@@ -85,7 +85,7 @@ namespace org.lb.NLisp
         {
             if (mode == Mode.normal && list.Count > 0 && list[0] is Symbol)
             {
-                if (defmacroSymbol.Equals((Symbol)list[0]))
+                if (defmacroSymbol.Equals(list[0]))
                 {
                     Symbol name = (Symbol)list[1];
                     list[0] = Symbol.fromString("lambda");

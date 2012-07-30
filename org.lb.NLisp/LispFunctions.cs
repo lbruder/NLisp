@@ -27,6 +27,28 @@ namespace org.lb.NLisp
         }
     }
 
+    internal sealed class BuiltinUnaryOperationFunction : BuiltinLispFunction
+    {
+        private readonly Func<LispObject, LispObject> op;
+        public BuiltinUnaryOperationFunction(string name, Func<LispObject, LispObject> op) : base(name) { this.op = op; }
+        public override LispObject Call(List<LispObject> parameters)
+        {
+            AssertParameterCount(parameters, 1);
+            return op(parameters[0]);
+        }
+    }
+
+    internal sealed class BuiltinBinaryOperationFunction : BuiltinLispFunction
+    {
+        private readonly Func<LispObject, LispObject, LispObject> op;
+        public BuiltinBinaryOperationFunction(string name, Func<LispObject, LispObject, LispObject> op) : base(name) { this.op = op; }
+        public override LispObject Call(List<LispObject> parameters)
+        {
+            AssertParameterCount(parameters, 2);
+            return op(parameters[0], parameters[1]);
+        }
+    }
+
     internal sealed class LispFunctionProxy : LispFunction
     {
         private readonly Delegate f;

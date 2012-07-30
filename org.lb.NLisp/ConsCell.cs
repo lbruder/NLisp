@@ -23,20 +23,6 @@ namespace org.lb.NLisp
         internal override LispObject Car() { return car; }
         internal override LispObject Cdr() { return cdr; }
 
-        internal override LispObject Add(LispObject other)
-        {
-            var list = this.ToList();
-            if (!(other is Nil)) list.AddRange(OtherConsCell(other, "+"));
-            return FromClrObject(list);
-        }
-
-        private ConsCell OtherConsCell(LispObject other, string op)
-        {
-            ConsCell n = other as ConsCell;
-            if (n == null) throw new InvalidOperationException(this, other, op);
-            return n;
-        }
-
         internal override LispObject Eval(Environment env)
         {
             if (quoteSym.Equals(car)) return ((ConsCell)cdr).car;

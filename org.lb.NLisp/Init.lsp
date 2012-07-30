@@ -39,6 +39,8 @@
       sym)
     (list 'car listvar)))
 
+(define nreverse reverse) ; TODO
+
 (defun map (f lst)
   (define ret nil)
   (while lst
@@ -62,10 +64,19 @@
       (setq acc nil))
   acc)
 
+(defun append (&rest lists)
+  (define ret nil)
+  (defun append-list (lst)
+    (while lst
+      (push (pop lst) ret)))
+  (while lists
+    (append-list (pop lists)))
+  (nreverse ret))
+
 (defmacro let (variable-list &rest body)
   (push (map car variable-list) body)
   (push 'lambda body)
-  (+ (list body) (map cadr variable-list)))
+  (append (list body) (map cadr variable-list)))
 
 (defun every (f lst)
   (if lst
@@ -133,6 +144,5 @@
     (push 'while body)
     (list 'let (list (list sym count-form)
                      (list var 0))
-      (+ body (list (list 'incf var)))
+      (append body (list (list 'incf var)))
       (or result-form 'nil))))
-

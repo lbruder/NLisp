@@ -37,7 +37,6 @@ namespace org.lb.NLisp
             AddUnaryFunction("stringp", obj => LispObject.FromClrObject(obj is LispString));
             AddUnaryFunction("length", LispStandardFunctions.Length);
             AddUnaryFunction("reverse", LispStandardFunctions.Reverse); // TODO: Implement in Init.lsp
-            AddUnaryFunction("nreverse", LispStandardFunctions.Reverse); // TODO: Implement in Init.lsp
             AddUnaryFunction("print", obj => { Print(obj.ToString()); return obj; });
             AddUnaryFunction("macroexpand-1", obj => { bool expandP; return Macroexpand1(obj, out expandP); });
             AddUnaryFunction("macroexpand", Macroexpand);
@@ -69,8 +68,8 @@ namespace org.lb.NLisp
             return ret;
         }
 
-        public void SetVariable(string identifier, object value) { global.Define(Symbol.fromString(identifier), LispObject.FromClrObject(value)); }
-        public void AddFunction(string identifier, Delegate f) { SetVariable(identifier, f); }
+        private void SetVariable(string identifier, object value) { global.Define(Symbol.fromString(identifier), LispObject.FromClrObject(value)); }
+        // TODO later public void AddFunction(string identifier, Delegate f) { SetVariable(identifier, f); }
 
         internal LispObject Eval(List<LispObject> ast) { return LispObject.FromClrObject(ast).Eval(global); }
         internal void AddMacro(Symbol identifier, Lambda expansionFunction) { global.DefineMacro(identifier, expansionFunction); }
