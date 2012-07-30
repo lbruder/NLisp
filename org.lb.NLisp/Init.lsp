@@ -1,8 +1,12 @@
 ; vim: et:lisp:ai
 
-; TODO: equalp, assoc, string manipulation functions, cond macro
+; TODO: eql, equal, assoc, string manipulation functions, cond macro
 
-(defun list (&rest args) args)
+(define list (lambda (&rest args) args))
+
+(defmacro defun (name args &rest body)
+  (list 'define name (cons 'lambda (cons args body))))
+
 (defun not (x) (if x nil t))
 (defun <= (a b) (not (> a b)))
 (defun >= (a b) (not (< a b)))

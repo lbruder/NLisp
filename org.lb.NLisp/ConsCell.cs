@@ -11,7 +11,6 @@ namespace org.lb.NLisp
         private static readonly Symbol ifSym = Symbol.fromString("if");
         private static readonly Symbol prognSym = Symbol.fromString("progn");
         private static readonly Symbol defineSym = Symbol.fromString("define");
-        private static readonly Symbol defunSym = Symbol.fromString("defun");
         private static readonly Symbol setSym = Symbol.fromString("setq");
         private static readonly Symbol lambdaSym = Symbol.fromString("lambda");
         private static readonly Symbol whileSym = Symbol.fromString("while");
@@ -31,7 +30,6 @@ namespace org.lb.NLisp
             if (defineSym.Equals(car)) return EvalDefine(env);
             if (setSym.Equals(car)) return EvalSet(env);
             if (lambdaSym.Equals(car)) return EvalLambda(env);
-            if (defunSym.Equals(car)) return EvalDefun(env);
             if (whileSym.Equals(car)) return EvalWhile(env);
             return EvalCall(env);
         }
@@ -74,16 +72,6 @@ namespace org.lb.NLisp
             if (asArray[1] is ConsCell) return new Lambda(env, (ConsCell)asArray[1], this.Skip(2).ToList());
             if (asArray[1] is Nil) return new Lambda(env, new LispObject[] { }, this.Skip(2).ToList());
             throw new ListExpectedException(asArray[1]);
-        }
-
-        private LispObject EvalDefun(Environment env)
-        {
-            var asArray = this.ToArray();
-            if (asArray.Length < 4) throw new ExpectedAtLeastNParametersGotMException(car, 3, asArray.Length - 1);
-            if (!(asArray[1] is Symbol)) throw new SymbolExpectedException(asArray[1]);
-            if (asArray[2] is ConsCell) return env.Define((Symbol)asArray[1], new Lambda(env, (ConsCell)asArray[2], this.Skip(3).ToList()));
-            if (asArray[2] is Nil) return env.Define((Symbol)asArray[1], new Lambda(env, new LispObject[] { }, this.Skip(3).ToList()));
-            throw new ListExpectedException(asArray[2]);
         }
 
         private LispObject EvalWhile(Environment env)
