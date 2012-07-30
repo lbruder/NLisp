@@ -118,20 +118,18 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="textBox2.Text" xml:space="preserve">
-    <value>(defmacro even-macro (x)
-  (list '= 0 (list 'mod x 2)))
+    <value>(defun primes (upto)
+  (let ((ret '(2))
+        (sieve (range 3 upto 2))
+        (current nil))
+    (while sieve
+      (setq current (car sieve))
+      (push current ret)
+      (setq sieve (filter
+                    (lambda (i) (&gt; (mod i current) 0))
+                    sieve)))
+    (reverse ret)))
 
-; Test 123
-
-(defun primep (n)
-    (if (&lt; n 4)
-        (&gt; n 1)
-        (if (even-macro n) ; Another Test
-            nil
-            (every
-              (lambda (i) (&lt; 0 (mod n i)))
-              (range 3 n 2)))))
-
-(print (filter primep (range 1000)))</value>
+(print (primes 1000))</value>
   </data>
 </root>

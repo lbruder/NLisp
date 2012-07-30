@@ -12,13 +12,14 @@ namespace org.lb.NLisp
         public static Symbol fromString(string value)
         {
             Symbol ret;
+            value = value.ToUpper();
             if (cache.TryGetValue(value, out ret)) return ret;
             ret = new Symbol(value);
             cache[value] = ret;
             return ret;
         }
 
-        public override bool IsTrue() { return value != "nil"; }
+        public override bool IsTrue() { return value != "NIL"; }
         internal override LispObject Eval(Environment env) { return env.Get(this); }
         public override string ToString() { return value; }
         public override bool Equals(object obj) { return obj == this; }
