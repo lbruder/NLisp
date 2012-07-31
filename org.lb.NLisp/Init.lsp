@@ -1,6 +1,6 @@
 ; vim: et:lisp:ai
 
-; TODO: eql, equal, assoc, string manipulation functions, cond macro
+; TODO: eql, equal, assoc, string manipulation functions
 
 (define list (lambda (&rest args) args))
 
@@ -25,6 +25,13 @@
 (defun abs (x) (if (< x 0) (- 0 x) x))
 (defun evenp (x) (= 0 (mod x 2)))
 (defun oddp (x) (not (evenp x)))
+
+(defmacro cond (&rest forms)
+  (defun expand (x)
+    (if x
+        (list 'if (caar x) (cons 'progn (cdar x)) (expand (cdr x)))
+        'nil))
+  (expand forms))
 
 (defmacro incf (varname)
   (list 'setq varname (list '+ varname 1)))

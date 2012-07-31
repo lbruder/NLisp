@@ -83,7 +83,7 @@ The base interpreter does NOT provide (yet):
 The init script provides the following on top of the base language:
 -------------------------------------------------------------------
 
-- Macros: defun, incf, decf, push, pop, let, and, or, dolist, dotimes
+- Macros: defun, cond, incf, decf, push, pop, let, and, or, dolist, dotimes
 
 - Functions: list, not, <=, >=, cxxr, cxxxr, abs, evenp, oddp,
   reverse, nreverse, map, filter, reduce, append, every, some
@@ -98,7 +98,7 @@ The init script provides the following on top of the base language:
 Future plans
 ------------
 
-- eql, equal, assoc, string manipulation functions, cond macro
+- eql, equal, assoc, string manipulation functions
 
 - More goodies as found in Common Lisp and/or Scheme
 
