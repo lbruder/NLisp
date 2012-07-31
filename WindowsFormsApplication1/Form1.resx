@@ -118,18 +118,21 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="textBox2.Text" xml:space="preserve">
-    <value>(defun primes (upto)
-  (let ((ret '(2))
-        (sieve (range 3 upto 2))
-        (current nil))
-    (while sieve
-      (setq current (car sieve))
-      (push current ret)
-      (setq sieve (filter
-                    (lambda (i) (&gt; (mod i current) 0))
-                    sieve)))
-    (reverse ret)))
+    <value>(defun primep (n)
+  (cond
+    ((&lt; n 4) (&gt; n 1))
+    ((evenp n) nil)
+    (t
+      (define i 3)
+      (while (and
+               (&lt; (* i i) n)
+               (&lt; 0 (mod n i)))
+        (setq i (+ i 2)))
+      (if (&lt;= (* i i) n) nil t))))
 
-(print (primes 1000))</value>
+(defun primes (upto)
+  (filter primep (range (+ 1 upto))))
+
+(print (primes 100000))</value>
   </data>
 </root>
