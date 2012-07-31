@@ -1,6 +1,6 @@
 ; vim: et:lisp:ai
 
-; TODO: equal, assoc, string manipulation functions
+; TODO: assoc, string manipulation functions
 
 (define list (lambda (&rest args) args))
 
@@ -75,6 +75,23 @@
     (setq lst (cdr lst)))
   (nreverse ret))
 
+(define remove-if-not filter)
+
+(defun remove-if (f lst)
+  (filter (lambda (i) (not (f i))) lst))
+
+(defun count-if (f lst)
+  (define ret 0)
+  (while lst
+    (if (f (car lst))
+        (incf ret)
+        nil)
+    (setq lst (cdr lst)))
+  ret)
+
+(defun count-if-not (f lst)
+  (count-if (lambda (i) (not (f i))) lst))
+
 (defun reduce (f lst)
   (define acc (pop lst))
   (if lst
@@ -106,14 +123,15 @@
         (cons t lst))
       t))
 
-(define all every)
-
 (defun some (f lst)
   (if lst
       (reduce
         (lambda (acc item) (if acc acc (f item)))
         (cons nil lst))
       nil))
+
+(define all every)
+(define any some)
 
 (defun range (&rest args)
   (defun values (from to step)
@@ -177,4 +195,32 @@
       (and (numberp a)
            (numberp b)
            (= a b))))
+
+(defun lists-equal (a b)
+  (define are-equal t)
+  (while (and a b are-equal)
+    (if (equal (car a) (car b))
+      (progn
+        (setq a (cdr a))
+        (setq b (cdr b)))
+      (setq are-equal nil)))
+  (and (not a) (not b) are-equal))
+
+(define string= =) ; TODO
+
+(defun equal (a b)
+  (cond ((eql a b) t)
+        ((and (consp a) (consp b)) (lists-equal a b))
+        ((and (stringp a) (stringp b)) (string= a b))
+        (t nil)))
+
+(defun sort (lst f)
+  (if lst
+      (progn
+        (define pivot (car lst))
+        (append
+          (sort (remove-if-not (lambda (x) (f x pivot)) (cdr lst)) f)
+          (list pivot)
+          (sort (remove-if (lambda (x) (f x pivot)) (cdr lst)) f)))
+      nil))
 

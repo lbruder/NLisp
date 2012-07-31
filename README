@@ -46,7 +46,7 @@ The base interpreter provides the following:
 - Basic functions: cons, car, cdr, eq, nullp, consp, symbolp, numberp, stringp
 
 - Basic arithmetic: +, -, *, /, mod, =, >, <
-  TODO: Comparison via < and > for strings; better as string>p, string<p?
+  TODO: Comparison via < and > for strings; better as string>, string<?
 
 - Basic macros: defmacro, macroexpand-1, macroexpand, gensym
 
@@ -82,8 +82,10 @@ The init script provides the following on top of the base language:
 
 - Macros: defun, cond, incf, decf, push, pop, let, and, or, dolist, dotimes
 
-- Functions: list, not, <=, >=, cxxr, cxxxr, abs, evenp, oddp,
-  reverse, nreverse, map, filter, reduce, append, every, some, eql
+- Functions: list, not, <=, >=, cxxr, cxxxr, abs, evenp, oddp, reverse,
+  nreverse (=reverse ATM), map, filter, reduce, append, every, some, eql,
+  equal, remove-if-not (=filter), remove-if, count-if, count-if-not,
+  all (=every), any (=some), sort
 
 - (range ?start-value below-value ?step)
   - (range 5) => (0 1 2 3 4)
@@ -107,8 +109,9 @@ Future plans
 
 - Thread functions
 
-- A faster version of the base interpreter that compiles all code to a bytecode
-  representation before executing, to be used with the same init script
+- A faster version of the base interpreter that compiles all code to a
+  bytecode representation before executing, to be used with the same init
+  script
 
 - A Java version of the base interpreter
 
