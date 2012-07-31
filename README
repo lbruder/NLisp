@@ -15,47 +15,112 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 Simple Lisp interpreter for C# 3.5
 ==================================
+
 This is a pet Lisp interpreter for .NET 3.5 written in C#.
+
 The main issue here is to have fun, NOT to make it as fast as possible!
 However, I strive to make the interpreter small and simple and keep most of
 the standard functions and macros in a separate "init" script, so another
 implementation of the base system with speed in mind should yield results
 pretty quickly.
 
-A quick overview:
 
-- Special Forms: define, defun, setq, if, quote, lambda, progn, while
-- cons, car, cdr, list, reverse, map, filter, reduce, every, some, not, let
-- nullp, consp, symbolp, stringp, numberp, length, reverse, eq, substring
-- push, pop
-- caar, cadr, cdar, cddr
-- and, or, dolist, dotimes
-- lexical scoping
-- minimal arithmetic (all numbers are double FOR NOW):
-  +, -, *, /, mod, =, >, <, <=, >=
-- recursion (no deep levels, no TCO yet!)
-- (range ?start-value below-value ?step)
-  (range 5) => (0 1 2 3 4)
-  (range 2 5) => (2 3 4)
-  (range 2 16 3) => (2 5 8 11 14)
-- print function (raises an event with the string to print)
-- t, nil as in Common Lisp
-- everything but nil evaluates to true
-- gensym
+The system is divided into two parts:
+-------------------------------------
+
+- The base interpreter providing a minimal Lisp-1 system
+
+- An init script, written in the Lisp dialect provided by the base
+  interpreter, creating a more fully featured language.
 
 
-Plans:
+The base interpreter provides the following:
+--------------------------------------------
+
+- Special Forms: define, setq, if, quote, lambda, progn, while
+  (Note: progn could be implemented as a macro based on lambda, but with the
+  current interpreter that would seriously hamper performance just to get rid
+  of 10 LOC in the C# code)
+
+- Lexical scoping
+
+- Constants: nil, t
+
+- Basic functions: cons, car, cdr, eq, nullp, consp, symbolp, numberp, stringp
+
+- Basic arithmetic: +, -, *, /, mod, =, >, <
+  TODO: Comparison via < and > for strings; better as string>p, string<p?
+
+- Basic macros: defmacro, macroexpand-1, macroexpand, gensym
+
+- Helpers: substring, length (for strings and lists), print (raises a c# event)
+
+- Eval function always works in the global environment
+
+- Basic stream operations:
+  - (sys:print obj stream) => obj
+  - (sys:open-file-for-output filename) => stream
+  - (sys:open-file-for-input filename) => stream
+  - (sys:read stream) => obj or nil on EOF
+  - (sys:read-line stream) => string or nil on EOF
+  - (sys:close stream) => t
+
+- Planned stream operations:
+  - (sys:open-file-for-append filename) => stream
+  - (sys:open-tcp-socket hostname-or-ip port) => stream
+
+
+The base interpreter does NOT provide (yet):
+--------------------------------------------
+
+- princ, prin1
+
 - Quasiquoting
-- string operations
-- strings as streams
-- sockets
+
+- Tail Call Optimization (thus the while SF)
 
 
-CLR FFI:
-- clr-methods
-- clr-properties
-- clr-get
-- clr-set
-- clr-new
-- clr-call (or ".")
-- Interpreter method AddFunction to use e.g. C# lambdas as Lisp functions
+The init script provides the following on top of the base language:
+-------------------------------------------------------------------
+
+- Macros: defun, incf, decf, push, pop, let, and, or, dolist, dotimes
+
+- Functions: list, not, <=, >=, cxxr, cxxxr, abs, evenp, oddp,
+  reverse, nreverse, map, filter, reduce, append, every, some
+
+- (range ?start-value below-value ?step)
+  - (range 5) => (0 1 2 3 4)
+  - (range 2 5) => (2 3 4)
+  - (range 2 16 3) => (2 5 8 11 14)
+
+- Planned stream operations: print, read, read-line, with-open-file...
+
+Future plans
+------------
+
+- eql, equal, assoc, string manipulation functions, cond macro
+
+- More goodies as found in Common Lisp and/or Scheme
+
+- Strings as streams?
+
+- Vectors
+
+- Exception handling
+
+- Thread functions
+
+- A faster version of the base interpreter that compiles all code to a bytecode
+  representation before executing, to be used with the same init script
+
+- A Java version of the base interpreter
+
+- A CLR FFI:
+  - clr-methods
+  - clr-properties
+  - clr-get
+  - clr-set
+  - clr-new
+  - clr-call (or ".")
+  - Interpreter method AddFunction to use e.g. C# lambdas as Lisp functions
+
