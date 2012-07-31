@@ -38,9 +38,6 @@ The base interpreter provides the following:
 --------------------------------------------
 
 - Special Forms: define, setq, if, quote, lambda, progn, while
-  (Note: progn could be implemented as a macro based on lambda, but with the
-  current interpreter that would seriously hamper performance just to get rid
-  of 10 LOC in the C# code)
 
 - Lexical scoping
 
@@ -86,7 +83,7 @@ The init script provides the following on top of the base language:
 - Macros: defun, cond, incf, decf, push, pop, let, and, or, dolist, dotimes
 
 - Functions: list, not, <=, >=, cxxr, cxxxr, abs, evenp, oddp,
-  reverse, nreverse, map, filter, reduce, append, every, some
+  reverse, nreverse, map, filter, reduce, append, every, some, eql
 
 - (range ?start-value below-value ?step)
   - (range 5) => (0 1 2 3 4)
@@ -98,7 +95,7 @@ The init script provides the following on top of the base language:
 Future plans
 ------------
 
-- eql, equal, assoc, string manipulation functions
+- equal, assoc, string manipulation functions
 
 - More goodies as found in Common Lisp and/or Scheme
 

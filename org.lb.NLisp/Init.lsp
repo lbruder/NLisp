@@ -1,6 +1,6 @@
 ; vim: et:lisp:ai
 
-; TODO: eql, equal, assoc, string manipulation functions
+; TODO: equal, assoc, string manipulation functions
 
 (define list (lambda (&rest args) args))
 
@@ -168,3 +168,11 @@
                      (list var 0))
       (append body (list (list 'incf var)))
       (or result-form 'nil))))
+
+(defun eql (a b)
+  (if (eq a b)
+      t
+      (and (numberp a)
+           (numberp b)
+           (= a b))))
+
