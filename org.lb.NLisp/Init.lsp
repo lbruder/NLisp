@@ -106,6 +106,8 @@
         (cons t lst))
       t))
 
+(define all every)
+
 (defun some (f lst)
   (if lst
       (reduce
