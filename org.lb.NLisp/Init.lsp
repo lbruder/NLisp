@@ -46,7 +46,8 @@
 (defun reverse (lst)
   (define ret nil)
   (while lst
-    (push (pop lst) ret))
+    (push (car lst) ret)
+    (setq lst (cdr lst)))
   ret)
 
 (define nreverse reverse) ; TODO
@@ -54,7 +55,8 @@
 (defun map (f lst)
   (define ret nil)
   (while lst
-    (push (f (pop lst)) ret))
+    (push (f (car lst)) ret)
+    (setq lst (cdr lst)))
   (nreverse ret))
 
 (defun filter (f lst)
@@ -70,7 +72,8 @@
   (define acc (pop lst))
   (if lst
       (while lst
-        (setq acc (f acc (pop lst))))
+        (setq acc (f acc (car lst)))
+        (setq lst (cdr lst)))
       (setq acc nil))
   acc)
 
@@ -78,7 +81,8 @@
   (define ret nil)
   (defun append-list (lst)
     (while lst
-      (push (pop lst) ret)))
+      (push (car lst) ret)
+      (setq lst (cdr lst))))
   (while lists
     (append-list (pop lists)))
   (nreverse ret))
@@ -136,7 +140,8 @@
         (list-form   (cadr var-list-form))
         (result-form (caddr var-list-form))
         (sym         (gensym)))
-    (push (list 'setq var (list 'pop sym)) body)
+    (push (list 'setq sym (list 'cdr sym)) body)
+    (push (list 'setq var (list 'car sym)) body)
     (push sym body)
     (push 'while body)
     (list 'let (list (list sym list-form)
