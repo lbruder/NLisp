@@ -128,11 +128,11 @@
                (&lt; (* i i) n)
                (&lt; 0 (mod n i)))
         (setq i (+ i 2)))
-      (if (&lt;= (* i i) n) nil t))))
+      (&gt; (* i i) n))))
 
 (defun primes (upto)
   (filter primep (range (+ 1 upto))))
 
-(print (primes 100000))</value>
+(print (primes 10000))</value>
   </data>
 </root>

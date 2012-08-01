@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -8,8 +9,20 @@ namespace org.lb.NLisp
     {
         public static LispObject Length(LispObject obj)
         {
+            if (obj.NullP()) return LispObject.FromClrObject(0);
             if (obj is IEnumerable<LispObject>) return LispObject.FromClrObject(((IEnumerable<LispObject>)obj).Count());
             throw new InvalidOperationException(obj, "length");
+        }
+    }
+
+    internal sealed class BuiltinRandomFunction : BuiltinLispFunction
+    {
+        private static readonly Random random = new Random();
+        public BuiltinRandomFunction() : base("random") { }
+        public override LispObject Call(List<LispObject> parameters)
+        {
+            AssertParameterCount(parameters, 1);
+            return FromClrObject(random.Next(((Number)parameters[0]).NumberAsInt));
         }
     }
 
@@ -23,6 +36,16 @@ namespace org.lb.NLisp
         }
     }
 
+    internal sealed class BuiltinApplyFunction : BuiltinLispFunction
+    {
+        public BuiltinApplyFunction() : base("apply") { }
+        public override LispObject Call(List<LispObject> parameters)
+        {
+            AssertParameterCount(parameters, 2);
+            return ((LispFunction) parameters[0]).Call(parameters[1].NullP() ? new List<LispObject>() : ((ConsCell)parameters[1]).ToList());
+        }
+    }
+    
     internal sealed class BuiltinGetSymbolsFunction : BuiltinLispFunction
     {
         private readonly Environment global;

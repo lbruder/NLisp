@@ -4,6 +4,14 @@ namespace org.lb.NLisp
 {
     // TODO: New base classes LispException, LispRuntimeError, LispCliError
 
+    public sealed class ExtraneousClosingParenException : Exception
+    {
+        internal ExtraneousClosingParenException()
+            : base("Extraneous )") // TODO: I18N
+        {
+        }
+    }
+
     public sealed class ConstantCanNotBeChangedException : Exception
     {
         internal ConstantCanNotBeChangedException(Symbol sym)

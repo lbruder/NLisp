@@ -8,7 +8,6 @@ namespace org.lb.NLisp
     // TODO:
     // - quasiquoting
     // - port operations (strings, sockets)
-    // - apply
     // - thread, join, semaphore, sem-p, sem-v
     // - clr FFI
 
@@ -26,10 +25,12 @@ namespace org.lb.NLisp
 
             SetVariable("t", T.GetInstance());
             SetVariable("nil", Nil.GetInstance());
+            SetVariable("apply", new BuiltinApplyFunction());
             SetVariable("gensym", new BuiltinGensymFunction());
             SetVariable("string", new BuiltinStringFunction());
             SetVariable("substring", new BuiltinSubstringFunction());
-
+            SetVariable("random", new BuiltinRandomFunction());
+            
             AddUnaryFunction("car", obj => obj.Car());
             AddUnaryFunction("cdr", obj => obj.Cdr());
             AddUnaryFunction("nullp", obj => LispObject.FromClrObject(obj.NullP()));

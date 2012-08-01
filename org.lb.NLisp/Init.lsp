@@ -141,9 +141,9 @@
       (setq from (+ from step)))
     (nreverse ret))
   (define arglen (length args))
-  (if (= 1 arglen)
-      (values 0 (car args) 1)
-      (values (car args) (cadr args) (if (> arglen 2) (caddr args) 1))))
+  (cond ((= 0 arglen) nil)
+        ((= 1 arglen) (values 0 (car args) 1))
+        (t (values (car args) (cadr args) (if (> arglen 2) (caddr args) 1)))))
 
 (defmacro and (&rest args)
   (defun expand (x)
@@ -207,6 +207,10 @@
   (and (not a) (not b) are-equal))
 
 (define string= =) ; TODO
+(define string> >) ; TODO
+(define string< <) ; TODO
+(define string>= >=) ; TODO
+(define string<= <=) ; TODO
 
 (defun equal (a b)
   (cond ((eql a b) t)
@@ -214,14 +218,18 @@
         ((and (stringp a) (stringp b)) (string= a b))
         (t nil)))
 
+(defmacro when (exp &rest body)
+  (list 'if exp (cons 'progn body) nil))
+
+(defmacro unless (exp &rest body)
+  (list 'if exp nil (cons 'progn body)))
+
 (defun sort (lst f)
-  (if lst
-      (progn
-        (define pivot (car lst))
-        (append
-          (sort (remove-if-not (lambda (x) (f x pivot)) (cdr lst)) f)
-          (list pivot)
-          (sort (remove-if (lambda (x) (f x pivot)) (cdr lst)) f)))
-      nil))
+  (when lst
+    (define pivot (car lst))
+    (append
+      (sort (remove-if-not (lambda (x) (f x pivot)) (cdr lst)) f)
+      (list pivot)
+      (sort (remove-if (lambda (x) (f x pivot)) (cdr lst)) f))))
 
 (map sys:make-symbol-constant (sys:get-global-symbols))

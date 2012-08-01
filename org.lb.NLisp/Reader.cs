@@ -44,6 +44,7 @@ namespace org.lb.NLisp
         {
             SkipWhitespace();
             char c = Peek();
+            if (c == ')') throw new ExtraneousClosingParenException();
             if (c == ';')
             {
                 SkipToEndOfLine();

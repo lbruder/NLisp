@@ -44,8 +44,8 @@ The base interpreter provides the following:
 - Constants: nil, t
 
 - Basic functions: cons, car, cdr, eq, nullp, consp, symbolp, numberp,
-  string, stringp, substring, length (for strings and lists),
-  print (raises a c# event on the interpreter),
+  apply, string, stringp, substring, length (for strings and lists),
+  random, print (raises a c# event on the interpreter),
   eval (always uses the global environment)
 
 - Basic arithmetic: +, -, *, /, mod, =, >, <
@@ -83,7 +83,8 @@ The base interpreter does NOT provide (yet):
 The init script provides the following on top of the base language:
 -------------------------------------------------------------------
 
-- Macros: defun, cond, incf, decf, push, pop, let, and, or, dolist, dotimes
+- Macros: defun, cond, incf, decf, push, pop, let, and, or, dolist, dotimes,
+  when, unless
 
 - Functions: list, not, <=, >=, cxxr, cxxxr, abs, evenp, oddp, reverse,
   nreverse (=reverse ATM), map, filter, reduce, append, every, some, eql,
