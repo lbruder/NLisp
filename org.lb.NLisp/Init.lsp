@@ -233,3 +233,4 @@
       (sort (remove-if (lambda (x) (f x pivot)) (cdr lst)) f))))
 
 (map sys:make-symbol-constant (sys:get-global-symbols))
+(map sys:make-macro-constant (sys:get-global-macros))

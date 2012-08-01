@@ -56,7 +56,9 @@ namespace org.lb.NLisp
             AddBinaryFunction(">", (o1, o2) => o1.Gt(o2));
 
             SetVariable("sys:get-global-symbols", new BuiltinGetSymbolsFunction(global));
+            SetVariable("sys:get-global-macros", new BuiltinGetMacrosFunction(global));
             AddUnaryFunction("sys:make-symbol-constant", symbol => { global.MakeSymbolConstant((Symbol)symbol); return T.GetInstance(); });
+            AddUnaryFunction("sys:make-macro-constant", symbol => { global.MakeMacroConstant((Symbol)symbol); return T.GetInstance(); });
 
             AddUnaryFunction("sys:open-file-for-input", filename => LispObject.FromClrObject(File.OpenRead(((LispString)filename).Value)));
             AddUnaryFunction("sys:open-file-for-output", filename => LispObject.FromClrObject(File.OpenWrite(((LispString)filename).Value)));

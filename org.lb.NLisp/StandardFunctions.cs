@@ -15,6 +15,8 @@ namespace org.lb.NLisp
         }
     }
 
+    // TODO: Refactor this file!!!
+
     internal sealed class BuiltinRandomFunction : BuiltinLispFunction
     {
         private static readonly Random random = new Random();
@@ -45,7 +47,7 @@ namespace org.lb.NLisp
             return ((LispFunction) parameters[0]).Call(parameters[1].NullP() ? new List<LispObject>() : ((ConsCell)parameters[1]).ToList());
         }
     }
-    
+
     internal sealed class BuiltinGetSymbolsFunction : BuiltinLispFunction
     {
         private readonly Environment global;
@@ -54,6 +56,17 @@ namespace org.lb.NLisp
         {
             AssertParameterCount(parameters, 0);
             return FromClrObject(global.GetSymbols());
+        }
+    }
+    
+    internal sealed class BuiltinGetMacrosFunction : BuiltinLispFunction
+    {
+        private readonly Environment global;
+        public BuiltinGetMacrosFunction(Environment global) : base("sys:get-macros") { this.global = global; }
+        public override LispObject Call(List<LispObject> parameters)
+        {
+            AssertParameterCount(parameters, 0);
+            return FromClrObject(global.GetMacros());
         }
     }
 
