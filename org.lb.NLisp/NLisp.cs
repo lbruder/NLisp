@@ -24,7 +24,10 @@ namespace org.lb.NLisp
         {
             reader = new Reader(this);
 
+            SetVariable("t", T.GetInstance());
+            SetVariable("nil", Nil.GetInstance());
             SetVariable("gensym", new BuiltinGensymFunction());
+            SetVariable("string", new BuiltinStringFunction());
             SetVariable("substring", new BuiltinSubstringFunction());
 
             AddUnaryFunction("car", obj => obj.Car());
@@ -50,6 +53,9 @@ namespace org.lb.NLisp
             AddBinaryFunction("=", (o1, o2) => o1.NumEq(o2));
             AddBinaryFunction("<", (o1, o2) => o1.Lt(o2));
             AddBinaryFunction(">", (o1, o2) => o1.Gt(o2));
+
+            SetVariable("sys:get-global-symbols", new BuiltinGetSymbolsFunction(global));
+            AddUnaryFunction("sys:make-symbol-constant", symbol => { global.MakeSymbolConstant((Symbol)symbol); return T.GetInstance(); });
 
             AddUnaryFunction("sys:open-file-for-input", filename => LispObject.FromClrObject(File.OpenRead(((LispString)filename).Value)));
             AddUnaryFunction("sys:open-file-for-output", filename => LispObject.FromClrObject(File.OpenWrite(((LispString)filename).Value)));

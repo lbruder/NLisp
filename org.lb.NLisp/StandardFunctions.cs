@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace org.lb.NLisp
 {
@@ -19,6 +20,29 @@ namespace org.lb.NLisp
         {
             AssertParameterCount(parameters, 0);
             return Symbol.Gensym();
+        }
+    }
+
+    internal sealed class BuiltinGetSymbolsFunction : BuiltinLispFunction
+    {
+        private readonly Environment global;
+        public BuiltinGetSymbolsFunction(Environment global) : base("sys:get-symbols") { this.global = global; }
+        public override LispObject Call(List<LispObject> parameters)
+        {
+            AssertParameterCount(parameters, 0);
+            return FromClrObject(global.GetSymbols());
+        }
+    }
+
+    internal sealed class BuiltinStringFunction : BuiltinLispFunction
+    {
+        public BuiltinStringFunction() : base("string") { }
+        public override LispObject Call(List<LispObject> parameters)
+        {
+            AssertParameterCountAtLeast(parameters, 1);
+            var sb = new StringBuilder();
+            foreach (var i in parameters) sb.Append(i.ToString());
+            return new LispString(sb.ToString());
         }
     }
 

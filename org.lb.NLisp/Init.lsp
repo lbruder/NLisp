@@ -224,3 +224,4 @@
           (sort (remove-if (lambda (x) (f x pivot)) (cdr lst)) f)))
       nil))
 
+(map sys:make-symbol-constant (sys:get-global-symbols))

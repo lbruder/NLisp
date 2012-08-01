@@ -43,16 +43,19 @@ The base interpreter provides the following:
 
 - Constants: nil, t
 
-- Basic functions: cons, car, cdr, eq, nullp, consp, symbolp, numberp, stringp
+- Basic functions: cons, car, cdr, eq, nullp, consp, symbolp, numberp,
+  string, stringp, substring, length (for strings and lists),
+  print (raises a c# event on the interpreter),
+  eval (always uses the global environment)
 
 - Basic arithmetic: +, -, *, /, mod, =, >, <
   TODO: Comparison via < and > for strings; better as string>, string<?
 
-- Basic macros: defmacro, macroexpand-1, macroexpand, gensym
+- Basic macro functionality: defmacro, macroexpand-1, macroexpand, gensym
 
-- Helpers: substring, length (for strings and lists), print (raises a c# event)
-
-- Eval function always works in the global environment
+- Helper methods:
+  - (sys:make-symbol-constant symbol) => t
+  - (sys:get-global-symbols) => list-of-symbol
 
 - Basic stream operations:
   - (sys:print obj stream) => obj
@@ -97,7 +100,7 @@ The init script provides the following on top of the base language:
 Future plans
 ------------
 
-- equal, assoc, string manipulation functions
+- assoc, string manipulation functions
 
 - More goodies as found in Common Lisp and/or Scheme
 
