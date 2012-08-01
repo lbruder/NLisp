@@ -16,21 +16,32 @@ namespace org.lb.NLisp
         private readonly Environment global = new Environment();
         private readonly Reader reader;
         private static readonly Symbol quoteSym = Symbol.fromString("quote");
+        private static readonly Random random = new Random();
 
         public event Action<string> Print = delegate { };
 
         public NLisp()
         {
             reader = new Reader(this);
+            AddStandardSymbols();
+            AddStandardFunctions();
+            AddSystemFunctions();
 
+            if (File.Exists("Init.lsp")) Evaluate(File.ReadAllText("Init.lsp"));
+        }
+
+        private void AddStandardSymbols()
+        {
             SetVariable("t", T.GetInstance());
             SetVariable("nil", Nil.GetInstance());
-            SetVariable("apply", new BuiltinApplyFunction());
-            SetVariable("gensym", new BuiltinGensymFunction());
             SetVariable("string", new BuiltinStringFunction());
             SetVariable("substring", new BuiltinSubstringFunction());
-            SetVariable("random", new BuiltinRandomFunction());
-            
+        }
+
+        private void AddStandardFunctions()
+        {
+            AddNullaryFunction("gensym", Symbol.Gensym);
+
             AddUnaryFunction("car", obj => obj.Car());
             AddUnaryFunction("cdr", obj => obj.Cdr());
             AddUnaryFunction("nullp", obj => LispObject.FromClrObject(obj.NullP()));
@@ -38,11 +49,17 @@ namespace org.lb.NLisp
             AddUnaryFunction("symbolp", obj => LispObject.FromClrObject(obj is Symbol));
             AddUnaryFunction("numberp", obj => LispObject.FromClrObject(obj is Number));
             AddUnaryFunction("stringp", obj => LispObject.FromClrObject(obj is LispString));
-            AddUnaryFunction("length", LispStandardFunctions.Length);
             AddUnaryFunction("print", obj => { Print(obj.ToString()); return obj; });
             AddUnaryFunction("macroexpand-1", obj => { bool expandP; return Macroexpand1(obj, out expandP); });
             AddUnaryFunction("macroexpand", Macroexpand);
             AddUnaryFunction("eval", obj => obj.Eval(global));
+            AddUnaryFunction("random", p => LispObject.FromClrObject(random.Next(((Number)p).NumberAsInt)));
+            AddUnaryFunction("length", obj =>
+            {
+                if (obj.NullP()) return LispObject.FromClrObject(0);
+                if (obj is IEnumerable<LispObject>) return LispObject.FromClrObject(((IEnumerable<LispObject>)obj).Count());
+                throw new InvalidOperationException(obj, "length");
+            });
 
             AddBinaryFunction("eq", (o1, o2) => LispObject.FromClrObject(o1 == o2)); // Numbers are not automatically considered eq!
             AddBinaryFunction("cons", ConsCell.Cons);
@@ -54,9 +71,14 @@ namespace org.lb.NLisp
             AddBinaryFunction("=", (o1, o2) => o1.NumEq(o2));
             AddBinaryFunction("<", (o1, o2) => o1.Lt(o2));
             AddBinaryFunction(">", (o1, o2) => o1.Gt(o2));
+            AddBinaryFunction("apply", (f, list) => ((LispFunction)f).Call(list.NullP() ? new List<LispObject>() : ((ConsCell)list).ToList()));
+        }
 
-            SetVariable("sys:get-global-symbols", new BuiltinGetSymbolsFunction(global));
-            SetVariable("sys:get-global-macros", new BuiltinGetMacrosFunction(global));
+        private void AddSystemFunctions()
+        {
+            AddNullaryFunction("sys:get-global-symbols", () => LispObject.FromClrObject(global.GetSymbols()));
+            AddNullaryFunction("sys:get-global-macros", () => LispObject.FromClrObject(global.GetMacros()));
+
             AddUnaryFunction("sys:make-symbol-constant", symbol => { global.MakeSymbolConstant((Symbol)symbol); return T.GetInstance(); });
             AddUnaryFunction("sys:make-macro-constant", symbol => { global.MakeMacroConstant((Symbol)symbol); return T.GetInstance(); });
 
@@ -91,8 +113,6 @@ namespace org.lb.NLisp
                 ((IDisposable)obj).Dispose();
                 return T.GetInstance();
             });
-
-            if (File.Exists("Init.lsp")) Evaluate(File.ReadAllText("Init.lsp"));
         }
 
         public LispObject Evaluate(string script)
@@ -114,6 +134,7 @@ namespace org.lb.NLisp
         internal LispObject Eval(List<LispObject> ast) { return LispObject.FromClrObject(ast).Eval(global); }
         internal void AddMacro(Symbol identifier, Lambda expansionFunction) { global.DefineMacro(identifier, expansionFunction); }
 
+        private void AddNullaryFunction(string name, Func<LispObject> op) { SetVariable(name, new BuiltinNullaryFunction(name, op)); }
         private void AddUnaryFunction(string name, Func<LispObject, LispObject> op) { SetVariable(name, new BuiltinUnaryOperationFunction(name, op)); }
         private void AddBinaryFunction(string name, Func<LispObject, LispObject, LispObject> op) { SetVariable(name, new BuiltinBinaryOperationFunction(name, op)); }
         private static void SkipWhitespaceInStream(TextReader stream) { while (char.IsWhiteSpace((char)stream.Peek())) stream.Read(); }

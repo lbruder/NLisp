@@ -27,6 +27,17 @@ namespace org.lb.NLisp
         }
     }
 
+    internal sealed class BuiltinNullaryFunction : BuiltinLispFunction
+    {
+        private readonly Func<LispObject> op;
+        public BuiltinNullaryFunction(string name, Func<LispObject> op) : base(name) { this.op = op; }
+        public override LispObject Call(List<LispObject> parameters)
+        {
+            AssertParameterCount(parameters, 0);
+            return op();
+        }
+    }
+
     internal sealed class BuiltinUnaryOperationFunction : BuiltinLispFunction
     {
         private readonly Func<LispObject, LispObject> op;
