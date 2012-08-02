@@ -59,11 +59,37 @@
 
 (define nreverse reverse) ; TODO
 
-(defun map (f lst)
+(defun reduce (f lst)
+  (define acc (pop lst))
+  (if lst
+      (while lst
+        (setq acc (f acc (car lst)))
+        (setq lst (cdr lst)))
+      (setq acc nil))
+  acc)
+
+(defun every (f lst)
+  (if lst
+      (reduce
+        (lambda (acc item) (if acc (f item) nil))
+        (cons t lst))
+      t))
+
+(defun identity (x) x)
+
+(defun map (f &rest lists)
+  (defun map1 (lst)
+    (while lst
+      (push (f (car lst)) ret)
+      (setq lst (cdr lst))))
+  (defun mapn ()
+    (while (every identity lists)
+      (push (apply f (map car lists)) ret)
+      (setq lists (map cdr lists))))
   (define ret nil)
-  (while lst
-    (push (f (car lst)) ret)
-    (setq lst (cdr lst)))
+  (if (cdr lists)
+    (mapn)
+    (map1 (car lists)))
   (nreverse ret))
 
 (defun filter (f lst)
@@ -92,15 +118,6 @@
 (defun count-if-not (f lst)
   (count-if (lambda (i) (not (f i))) lst))
 
-(defun reduce (f lst)
-  (define acc (pop lst))
-  (if lst
-      (while lst
-        (setq acc (f acc (car lst)))
-        (setq lst (cdr lst)))
-      (setq acc nil))
-  acc)
-
 (defun append (&rest lists)
   (define ret nil)
   (defun append-list (lst)
@@ -115,13 +132,6 @@
   (push (map car variable-list) body)
   (push 'lambda body)
   (append (list body) (map cadr variable-list)))
-
-(defun every (f lst)
-  (if lst
-      (reduce
-        (lambda (acc item) (if acc (f item) nil))
-        (cons t lst))
-      t))
 
 (defun some (f lst)
   (if lst
@@ -231,6 +241,20 @@
       (sort (remove-if-not (lambda (x) (f x pivot)) (cdr lst)) f)
       (list pivot)
       (sort (remove-if (lambda (x) (f x pivot)) (cdr lst)) f))))
+
+(defun acons (key datum alist)
+  (cons (cons key datum) alist))
+
+(defun pairlis (keys data)
+  (map cons keys data))
+
+(defun assoc (item alist)
+  (define ret nil)
+  (while (and alist (not ret))
+    (if (equal (caar alist) item)
+        (setq ret (car alist))
+        (setq alist (cdr alist))))
+  ret)
 
 (map sys:make-symbol-constant (sys:get-global-symbols))
 (map sys:make-macro-constant (sys:get-global-macros))

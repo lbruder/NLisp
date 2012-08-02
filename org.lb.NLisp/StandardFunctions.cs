@@ -10,7 +10,7 @@ namespace org.lb.NLisp
         {
             AssertParameterCountAtLeast(parameters, 1);
             var sb = new StringBuilder();
-            foreach (var i in parameters) sb.Append(i.ToString());
+            foreach (var i in parameters) sb.Append(i is LispString ? ((LispString)i).Value : i.ToString());
             return new LispString(sb.ToString());
         }
     }

@@ -89,7 +89,9 @@ The init script provides the following on top of the base language:
 - Functions: list, not, <=, >=, cxxr, cxxxr, abs, evenp, oddp, reverse,
   nreverse (=reverse ATM), map, filter, reduce, append, every, some, eql,
   equal, remove-if-not (=filter), remove-if, count-if, count-if-not,
-  all (=every), any (=some), sort
+  all (=every), any (=some), sort, identity, acons, assoc, pairlis
+
+- The map function corresponds to mapcar as found in Common Lisp
 
 - (range ?start-value below-value ?step)
   - (range 5) => (0 1 2 3 4)
@@ -101,7 +103,9 @@ The init script provides the following on top of the base language:
 Future plans
 ------------
 
-- assoc, string manipulation functions
+- with-open-file
+
+- string manipulation functions
 
 - More goodies as found in Common Lisp and/or Scheme
 
