@@ -1,15 +1,12 @@
 ; vim: et:lisp:ai
 
-; TODO: assoc, string manipulation functions
+; TODO: string manipulation functions
 
 (define list (lambda (&rest args) args))
 
 (defmacro defun (name args &rest body)
   (list 'define name (cons 'lambda (cons args body))))
 
-(defun not (x) (if x nil t))
-(defun <= (a b) (not (> a b)))
-(defun >= (a b) (not (< a b)))
 (defun caar (x) (car (car x)))
 (defun cadr (x) (car (cdr x)))
 (defun cdar (x) (cdr (car x)))
@@ -22,6 +19,15 @@
 (defun cdadr (x) (cdr (car (cdr x))))
 (defun cddar (x) (cdr (cdr (car x))))
 (defun cdddr (x) (cdr (cdr (cdr x))))
+
+(defun not (x) (if x nil t))
+(defun <= (a b) (not (> a b)))
+(defun >= (a b) (not (< a b)))
+(define string= =) ; TODO
+(define string> >) ; TODO
+(define string< <) ; TODO
+(defun string<= (a b) (not (string> a b)))
+(defun string>= (a b) (not (string< a b)))
 (defun abs (x) (if (< x 0) (- 0 x) x))
 (defun evenp (x) (= 0 (mod x 2)))
 (defun oddp (x) (not (evenp x)))
@@ -215,12 +221,6 @@
         (setq b (cdr b)))
       (setq are-equal nil)))
   (and (not a) (not b) are-equal))
-
-(define string= =) ; TODO
-(define string> >) ; TODO
-(define string< <) ; TODO
-(define string>= >=) ; TODO
-(define string<= <=) ; TODO
 
 (defun equal (a b)
   (cond ((eql a b) t)

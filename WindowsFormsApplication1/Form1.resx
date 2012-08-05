@@ -122,13 +122,10 @@
   (cond
     ((&lt; n 4) (&gt; n 1))
     ((evenp n) nil)
-    (t
-      (define i 3)
-      (while (and
-               (&lt; (* i i) n)
-               (&lt; 0 (mod n i)))
-        (setq i (+ i 2)))
-      (&gt; (* i i) n))))
+    (t (let ((i 3))
+         (while (and (&lt; (* i i) n) (&lt; 0 (mod n i)))
+           (setq i (+ i 2)))
+         (&gt; (* i i) n)))))
 
 (defun primes (upto)
   (filter primep (range (+ 1 upto))))
