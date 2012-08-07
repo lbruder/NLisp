@@ -228,6 +228,17 @@
         ((and (stringp a) (stringp b)) (string= a b))
         (t nil)))
 
+(defun member-if-not (f lst)
+  (while (and lst (f (car lst)))
+    (setq lst (cdr lst)))
+  lst)
+
+(defun member-if (f lst)
+  (member-if-not (lambda (item) (not (f item))) lst))
+
+(defun member (item lst)
+  (member-if (lambda (x) (equal x item)) lst))
+
 (defmacro when (exp &rest body)
   (list 'if exp (cons 'progn body) nil))
 
