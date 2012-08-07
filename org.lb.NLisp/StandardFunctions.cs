@@ -28,4 +28,29 @@ namespace org.lb.NLisp
                 : str.Substring(from, ((Number)parameters[2]).NumberAsInt - from));
         }
     }
+
+    internal sealed class BuiltinMakeArrayFunction : BuiltinLispFunction
+    {
+        public BuiltinMakeArrayFunction() : base("make-array") { }
+        public override LispObject Call(List<LispObject> parameters)
+        {
+            AssertParameterCountAtLeast(parameters, 1);
+            int dimension = ((Number)parameters[0]).NumberAsInt;
+            LispObject initialElement = (parameters.Count > 1) ? parameters[1] : Nil.GetInstance();
+            return new Array(dimension, initialElement);
+        }
+    }
+
+    internal sealed class BuiltinAsetFunction : BuiltinLispFunction
+    {
+        public BuiltinAsetFunction() : base("sys:aset") { }
+        public override LispObject Call(List<LispObject> parameters)
+        {
+            AssertParameterCount(parameters, 3);
+            Array array = (Array)parameters[0];
+            int index = ((Number)parameters[1]).NumberAsInt;
+            LispObject newValue = parameters[2];
+            return array.SetElt(index, newValue);
+        }
+    }
 }

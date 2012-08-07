@@ -38,6 +38,7 @@
     <Compile Include="Environment.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="ConsCell.cs" />
+    <Compile Include="Array.cs" />
     <Compile Include="LispFunctions.cs" />
     <Compile Include="LispObject.cs" />
     <Compile Include="LispStream.cs" />

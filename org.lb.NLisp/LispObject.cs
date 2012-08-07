@@ -9,8 +9,8 @@ namespace org.lb.NLisp
         public virtual bool IsTrue() { return true; }
         internal virtual bool NullP() { return false; }
         internal virtual LispObject Eval(Environment env) { return Nil.GetInstance(); }
-        internal virtual LispObject Car() { throw new ObjectIsNotAListException(this); }
-        internal virtual LispObject Cdr() { throw new ObjectIsNotAListException(this); }
+        internal virtual LispObject Car() { throw new ObjectIsNotAConsCellException(this); }
+        internal virtual LispObject Cdr() { throw new ObjectIsNotAConsCellException(this); }
         internal virtual LispObject Add(LispObject other) { throw new InvalidOperationException(this, other, "+"); }
         internal virtual LispObject Sub(LispObject other) { throw new InvalidOperationException(this, other, "-"); }
         internal virtual LispObject Mul(LispObject other) { throw new InvalidOperationException(this, other, "*"); }
@@ -19,6 +19,8 @@ namespace org.lb.NLisp
         internal virtual LispObject NumEq(LispObject other) { throw new InvalidOperationException(this, other, "="); }
         internal virtual LispObject Gt(LispObject other) { throw new InvalidOperationException(this, other, ">"); }
         internal virtual LispObject Lt(LispObject other) { throw new InvalidOperationException(this, other, "<"); }
+        internal virtual LispObject Elt(int index) { throw new ObjectIsNotASequenceException(this); }
+        internal virtual LispObject SetElt(int index, LispObject value) { throw new ObjectIsNotASequenceException(this); }
 
         public static LispObject FromClrObject(object source)
         {

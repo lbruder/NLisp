@@ -52,10 +52,18 @@ namespace org.lb.NLisp
         }
     }
 
-    public sealed class ObjectIsNotAListException : Exception
+    public sealed class ObjectIsNotAConsCellException : Exception
     {
-        internal ObjectIsNotAListException(object obj)
-            : base("The value " + obj + " is not a list") // TODO: I18N
+        internal ObjectIsNotAConsCellException(object obj)
+            : base("The value " + obj + " is not a cons cell") // TODO: I18N
+        {
+        }
+    }
+
+    public sealed class ObjectIsNotASequenceException : Exception
+    {
+        internal ObjectIsNotASequenceException(object obj)
+            : base("The value " + obj + " is not a sequence") // TODO: I18N
         {
         }
     }

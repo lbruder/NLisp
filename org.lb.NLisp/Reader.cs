@@ -6,6 +6,7 @@ using System.Text;
 
 namespace org.lb.NLisp
 {
+    // TODO: Quasiquoting, Arrays, Dotted Lists
     internal sealed class Reader
     {
         private static readonly Symbol defmacroSymbol = Symbol.fromString("defmacro");

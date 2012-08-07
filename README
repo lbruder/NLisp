@@ -46,7 +46,7 @@ The base interpreter provides the following:
 - Basic functions: cons, car, cdr, eq, nullp, consp, symbolp, numberp,
   apply, string, stringp, substring, length (for strings and lists),
   random, print (raises a c# event on the interpreter),
-  eval (always uses the global environment)
+  eval (always uses the global environment), make-array, arrayp, aref
 
 - Basic arithmetic: +, -, *, /, mod, =, >, <
   TODO: Comparison via < and > for strings; better as string>, string<?
@@ -54,6 +54,7 @@ The base interpreter provides the following:
 - Basic macro functionality: defmacro, macroexpand-1, macroexpand, gensym
 
 - Helper methods:
+  - (sys:aset array index value) => value
   - (sys:make-symbol-constant symbol) => t
   - (sys:get-global-symbols) => list-of-symbol
 
@@ -102,7 +103,7 @@ The init script provides the following on top of the base language:
   - (range 2 5) => (2 3 4)
   - (range 2 16 3) => (2 5 8 11 14)
 
-- Planned stream operations: print, read, read-line, with-open-file...
+- Planned: setf, print, read, read-line, with-open-file...
 
 
 Future plans
@@ -119,8 +120,6 @@ Future plans
 - More goodies as found in Common Lisp and/or Scheme
 
 - Strings as streams?
-
-- Vectors
 
 - Exception handling
 

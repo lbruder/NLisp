@@ -28,6 +28,7 @@ namespace org.lb.NLisp
         {
             SetVariable("t", T.GetInstance());
             SetVariable("nil", Nil.GetInstance());
+            SetVariable("make-array", new BuiltinMakeArrayFunction());
             SetVariable("string", new BuiltinStringFunction());
             SetVariable("substring", new BuiltinSubstringFunction());
         }
@@ -43,6 +44,7 @@ namespace org.lb.NLisp
             AddUnaryFunction("symbolp", obj => LispObject.FromClrObject(obj is Symbol));
             AddUnaryFunction("numberp", obj => LispObject.FromClrObject(obj is Number));
             AddUnaryFunction("stringp", obj => LispObject.FromClrObject(obj is LispString));
+            AddUnaryFunction("arrayp", obj => LispObject.FromClrObject(obj is Array));
             AddUnaryFunction("print", obj => { Print(obj.ToString()); return obj; });
             AddUnaryFunction("macroexpand-1", obj => { bool expandP; return Macroexpand1(obj, out expandP); });
             AddUnaryFunction("macroexpand", Macroexpand);
@@ -66,10 +68,13 @@ namespace org.lb.NLisp
             AddBinaryFunction("<", (o1, o2) => o1.Lt(o2));
             AddBinaryFunction(">", (o1, o2) => o1.Gt(o2));
             AddBinaryFunction("apply", (f, list) => ((LispFunction)f).Call(list.NullP() ? new List<LispObject>() : ((ConsCell)list).ToList()));
+            AddBinaryFunction("aref", (array, index) => ((Array)array).Elt(((Number)index).NumberAsInt));
         }
 
         private void AddSystemFunctions()
         {
+            SetVariable("sys:aset", new BuiltinAsetFunction());
+            
             AddNullaryFunction("sys:get-global-symbols", () => LispObject.FromClrObject(global.GetSymbols()));
             AddNullaryFunction("sys:get-global-macros", () => LispObject.FromClrObject(global.GetMacros()));
 
