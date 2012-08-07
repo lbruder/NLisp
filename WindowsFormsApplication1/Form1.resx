@@ -119,10 +119,8 @@
   </resheader>
   <data name="textBox2.Text" xml:space="preserve">
     <value>(defun primes (upto)
-  (let ((sieve (make-array upto))
+  (let ((sieve (vector t t))
         (ret nil))
-    (sys:aset sieve 0 t)
-    (sys:aset sieve 1 t)
     (dotimes (n upto)
       (unless (aref sieve n)
         (dolist (i (range n upto n))

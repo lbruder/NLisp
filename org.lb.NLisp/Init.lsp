@@ -267,5 +267,13 @@
         (setq alist (cdr alist))))
   ret)
 
+(defun vector (&rest values)
+  (let ((ret (make-array 0))
+        (index 0))
+    (dolist (i values)
+      (sys:aset ret index i)
+      (incf index))
+    ret))
+
 (map sys:make-symbol-constant (sys:get-global-symbols))
 (map sys:make-macro-constant (sys:get-global-macros))
