@@ -66,6 +66,9 @@ The base interpreter provides the following:
   - (sys:close stream) => t
 
 - Planned stream operations:
+  - (sys:eof-p stream) => bool
+  - (sys:read-char stream) => string* or nil on EOF
+    *until a char data type is implemented
   - (sys:open-file-for-append filename) => stream
   - (sys:open-tcp-socket hostname-or-ip port) => stream
 
@@ -89,7 +92,8 @@ The init script provides the following on top of the base language:
 - Functions: list, not, <=, >=, cxxr, cxxxr, abs, evenp, oddp, reverse,
   nreverse (=reverse ATM), map, filter, reduce, append, every, some, eql,
   equal, remove-if-not (=filter), remove-if, count-if, count-if-not,
-  all (=every), any (=some), sort, identity, acons, assoc, pairlis
+  all (=every), any (=some), sort, identity, acons, assoc, pairlis,
+  member, member-if, member-if-not, styring>=, string<=
 
 - The map function corresponds to mapcar as found in Common Lisp
 
@@ -100,8 +104,13 @@ The init script provides the following on top of the base language:
 
 - Planned stream operations: print, read, read-line, with-open-file...
 
+
 Future plans
 ------------
+
+- Generate init-script-part of README from the script itself (SPOT rule)
+
+- rplaca, rplacd, nreverse, setf...
 
 - with-open-file
 
@@ -131,4 +140,3 @@ Future plans
   - clr-new
   - clr-call (or ".")
   - Interpreter method AddFunction to use e.g. C# lambdas as Lisp functions
-

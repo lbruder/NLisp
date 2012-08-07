@@ -5,12 +5,6 @@ using System.Linq;
 
 namespace org.lb.NLisp
 {
-    // TODO:
-    // - quasiquoting
-    // - port operations (strings, sockets)
-    // - thread, join, semaphore, sem-p, sem-v
-    // - clr FFI
-
     public sealed class NLisp
     {
         private readonly Environment global = new Environment();
