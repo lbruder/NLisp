@@ -6,11 +6,13 @@ using System.Text;
 
 namespace org.lb.NLisp
 {
-    // TODO: Quasiquoting, Arrays, Dotted Lists
+    // TODO: Quasiquoting
+    // TODO: Complete Dotted Lists
     internal sealed class Reader
     {
         private static readonly Symbol defmacroSymbol = Symbol.fromString("defmacro");
         private static readonly Symbol quoteSymbol = Symbol.fromString("quote");
+        private static readonly Symbol dotSymbol = Symbol.fromString(".");
         private readonly NLisp lisp;
         private TextReader reader;
         private bool expandMacros;
@@ -57,6 +59,7 @@ namespace org.lb.NLisp
                 return ConsCell.Cons(quoteSymbol, ConsCell.Cons(Read(Mode.quoting), Nil.GetInstance()));
             }
             if (c == '(') return ReadCons(mode);
+            if (c == '[') return ReadArray(mode);
             if (c == '"') return ReadString();
             return ReadSymbolOrNumber();
         }
@@ -78,10 +81,34 @@ namespace org.lb.NLisp
             SkipWhitespace();
             while (Peek() != ')')
             {
-                ret.Add(Read(mode));
+                var next = Read(mode);
+                if (dotSymbol.Equals(next))
+                {
+                    SkipWhitespace();
+                    ret.Add(Read(mode));
+                    if (reader.Read() != ')')
+                        throw new InvalidDottedConsCellException();
+                    return EvalMacros(mode, ret); // TODO
+                }
+                ret.Add(next);
                 SkipWhitespace();
             }
             reader.Read(); // Closing parenthesis
+            return EvalMacros(mode, ret);
+        }
+
+        private LispObject ReadArray(Mode mode)
+        {
+            var ret = new List<LispObject>();
+            ret.Add(Symbol.fromString("vector"));
+            reader.Read(); // Opening [
+            SkipWhitespace();
+            while (Peek() != ']')
+            {
+                ret.Add(Read(mode));
+                SkipWhitespace();
+            }
+            reader.Read(); // Closing ]
             return EvalMacros(mode, ret);
         }
 
@@ -128,7 +155,7 @@ namespace org.lb.NLisp
         private LispObject ReadSymbolOrNumber()
         {
             var value = new StringBuilder();
-            while (reader.Peek() != -1 && (Peek() != ')' && !Char.IsWhiteSpace(Peek()))) value.Append((char)reader.Read());
+            while (reader.Peek() != -1 && (Peek() != ')' && Peek() != ']' && !Char.IsWhiteSpace(Peek()))) value.Append((char)reader.Read());
             double d; if (double.TryParse(value.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out d)) return new Number(d);
             return Symbol.fromString(value.ToString());
         }

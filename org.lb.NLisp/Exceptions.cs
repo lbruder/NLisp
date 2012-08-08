@@ -20,6 +20,14 @@ namespace org.lb.NLisp
         }
     }
 
+    public sealed class InvalidDottedConsCellException : Exception
+    {
+        internal InvalidDottedConsCellException()
+            : base("Invalid dotted cons cell") // TODO: I18N
+        {
+        }
+    }
+
     public sealed class StreamCanNotBeEvaluatedException : Exception
     {
         internal StreamCanNotBeEvaluatedException()

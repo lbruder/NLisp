@@ -35,7 +35,7 @@ namespace org.lb.NLisp
         public override string ToString()
         {
             var ret = new StringBuilder();
-            ret.Append("#<");
+            ret.Append("[");
             bool firstItem = true;
 
             foreach (var item in values)
@@ -44,7 +44,7 @@ namespace org.lb.NLisp
                 ret.Append(item.ToString());
             }
 
-            ret.Append('>');
+            ret.Append(']');
             return ret.ToString();
         }
 
