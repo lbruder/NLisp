@@ -68,7 +68,7 @@ namespace org.lb.NLisp
             AddBinaryFunction("<", (o1, o2) => o1.Lt(o2));
             AddBinaryFunction(">", (o1, o2) => o1.Gt(o2));
             AddBinaryFunction("apply", (f, list) => ((LispFunction)f).Call(list.NullP() ? new List<LispObject>() : ((ConsCell)list).ToList()));
-            AddBinaryFunction("aref", (array, index) => ((Array)array).Elt(((Number)index).NumberAsInt));
+            AddBinaryFunction("aref", (array, index) => array.Elt(((Number)index).NumberAsInt));
         }
 
         private void AddSystemFunctions()

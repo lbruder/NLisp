@@ -47,7 +47,7 @@ namespace org.lb.NLisp
         public override LispObject Call(List<LispObject> parameters)
         {
             AssertParameterCount(parameters, 3);
-            Array array = (Array)parameters[0];
+            var array = parameters[0];
             int index = ((Number)parameters[1]).NumberAsInt;
             LispObject newValue = parameters[2];
             return array.SetElt(index, newValue);
