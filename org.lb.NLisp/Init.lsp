@@ -98,6 +98,20 @@
     (map1 (car lists)))
   (nreverse ret))
 
+(defun for-each (f &rest lists)
+  (defun foreach1 (lst)
+    (while lst
+      (f (car lst))
+      (setq lst (cdr lst))))
+  (defun foreachn ()
+    (while (every identity lists)
+      (apply f (map car lists))
+      (setq lists (map cdr lists))))
+  (if (cdr lists)
+    (foreachn)
+    (foreach1 (car lists)))
+  t)
+
 (defun filter (f lst)
   (define ret nil)
   (while lst
@@ -191,7 +205,7 @@
                      (list var 'nil))
       body
       (list 'setq var 'nil)
-      (or result-form 'nil))))
+      result-form)))
 
 (defmacro dotimes (var-count-form &rest body)
   (let ((var         (car var-count-form))
@@ -203,7 +217,7 @@
     (list 'let (list (list sym count-form)
                      (list var 0))
       (append body (list (list 'incf var)))
-      (or result-form 'nil))))
+      result-form)))
 
 (defun eql (a b)
   (if (eq a b)

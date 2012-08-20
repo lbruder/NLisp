@@ -94,7 +94,7 @@ The init script provides the following on top of the base language:
   nreverse (=reverse ATM), map, filter, reduce, append, every, some, eql,
   equal, remove-if-not (=filter), remove-if, count-if, count-if-not,
   all (=every), any (=some), sort, identity, acons, assoc, pairlis,
-  member, member-if, member-if-not, string>=, string<=, vector
+  member, member-if, member-if-not, string>=, string<=, vector, for-each
 
 - The map function corresponds to mapcar as found in Common Lisp
 
