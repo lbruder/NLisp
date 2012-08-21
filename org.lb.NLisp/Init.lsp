@@ -63,7 +63,14 @@
     (setq lst (cdr lst)))
   ret)
 
-(define nreverse reverse) ; TODO
+(defun nreverse (lst)
+  (define last-cell nil)
+  (while lst
+    (define next-cell (cdr lst))
+    (rplacd lst last-cell)
+    (setq last-cell lst)
+    (setq lst next-cell))
+  last-cell)
 
 (defun reduce (f lst)
   (define acc (pop lst))

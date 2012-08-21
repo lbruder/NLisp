@@ -69,12 +69,14 @@ namespace org.lb.NLisp
             AddBinaryFunction(">", (o1, o2) => o1.Gt(o2));
             AddBinaryFunction("apply", (f, list) => ((LispFunction)f).Call(list.NullP() ? new List<LispObject>() : ((ConsCell)list).ToList()));
             AddBinaryFunction("aref", (array, index) => array.Elt(((Number)index).NumberAsInt));
+            AddBinaryFunction("rplaca", (cons, newCar) => ((ConsCell)cons).SetCar(newCar));
+            AddBinaryFunction("rplacd", (cons, newCdr) => ((ConsCell)cons).SetCdr(newCdr));
         }
 
         private void AddSystemFunctions()
         {
             SetVariable("sys:aset", new BuiltinAsetFunction());
-            
+
             AddNullaryFunction("sys:get-global-symbols", () => LispObject.FromClrObject(global.GetSymbols()));
             AddNullaryFunction("sys:get-global-macros", () => LispObject.FromClrObject(global.GetMacros()));
 

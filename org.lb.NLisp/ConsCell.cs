@@ -15,12 +15,14 @@ namespace org.lb.NLisp
         private static readonly Symbol lambdaSym = Symbol.fromString("lambda");
         private static readonly Symbol whileSym = Symbol.fromString("while");
 
-        private readonly LispObject car;
-        private readonly LispObject cdr;
+        private LispObject car;
+        private LispObject cdr;
         private ConsCell(LispObject car, LispObject cdr) { this.car = car; this.cdr = cdr; }
         public static ConsCell Cons(LispObject car, LispObject cdr) { return new ConsCell(car, cdr); }
         internal override LispObject Car() { return car; }
         internal override LispObject Cdr() { return cdr; }
+        internal LispObject SetCar(LispObject newCar) { car = newCar; return this; }
+        internal LispObject SetCdr(LispObject newCdr) { cdr = newCdr; return this; }
 
         internal override LispObject Eval(Environment env)
         {

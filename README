@@ -45,7 +45,7 @@ The base interpreter provides the following:
 
 - Basic functions: cons, car, cdr, eq, nullp, consp, symbolp, numberp,
   apply, string, stringp, substring, length (for strings, lists, arrays),
-  random, print (raises a c# event on the interpreter),
+  random, print (raises a c# event on the interpreter), rplaca, rplacd,
   eval (always uses the global environment), make-array, arrayp, aref
 
 - Basic arithmetic: +, -, *, /, mod, =, >, <
@@ -91,8 +91,8 @@ The init script provides the following on top of the base language:
   when, unless
 
 - Functions: list, not, <=, >=, cxxr, cxxxr, abs, evenp, oddp, reverse,
-  nreverse (=reverse ATM), map, filter, reduce, append, every, some, eql,
-  equal, remove-if-not (=filter), remove-if, count-if, count-if-not,
+  nreverse, map, filter, reduce, append, every, some, eql, equal,
+  remove-if-not (=filter), remove-if, count-if, count-if-not,
   all (=every), any (=some), sort, identity, acons, assoc, pairlis,
   member, member-if, member-if-not, string>=, string<=, vector, for-each
 
@@ -109,9 +109,9 @@ The init script provides the following on top of the base language:
 Future plans
 ------------
 
-- Generate init-script-part of README from the script itself (SPOT rule)
+- setf, coerce
 
-- rplaca, rplacd, nreverse, setf...
+- Generate init-script-part of README from the script itself (SPOT rule)
 
 - with-open-file
 
